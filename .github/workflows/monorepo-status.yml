@@ -1,0 +1,67 @@
+name: Monorepo Status
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  generate-status:
+    name: Generate Project Status
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: 📊 Count screens and files
+        id: count
+        run: |
+          echo "🔍 Analyzing project structure..."
+          
+          # Patient App
+          PATIENT_SCREENS=$(find apps/patient-app/lib/features -name '*_screen.dart' 2>/dev/null | wc -l)
+          echo "patient_screens=$PATIENT_SCREENS" >> $GITHUB_OUTPUT
+          
+          # Doctor App
+          DOCTOR_SCREENS=$(find apps/doctor-app/lib/features -name '*_screen.dart' 2>/dev/null | wc -l)
+          echo "doctor_screens=$DOCTOR_SCREENS" >> $GITHUB_OUTPUT
+          
+          # Driver App
+          DRIVER_SCREENS=$(find apps/driver-app/lib/features -name '*_screen.dart' 2>/dev/null | wc -l)
+          echo "driver_screens=$DRIVER_SCREENS" >> $GITHUB_OUTPUT
+          
+          # Documentation
+          DOC_FILES=$(find docs -name '*.md' 2>/dev/null | wc -l)
+          echo "doc_files=$DOC_FILES" >> $GITHUB_OUTPUT
+          
+          # Total Dart files
+          TOTAL_DART=$(find . -name '*.dart' -not -path '*/.*' 2>/dev/null | wc -l)
+          echo "total_dart=$TOTAL_DART" >> $GITHUB_OUTPUT
+      
+      - name: 📈 Display statistics
+        run: |
+          echo "# 📊 SmartCura Project Statistics"
+          echo ""
+          echo "## 📱 Mobile Apps"
+          echo "- Patient App: ${{ steps.count.outputs.patient_screens }} screens"
+          echo "- Doctor App: ${{ steps.count.outputs.doctor_screens }} screens"
+          echo "- Driver App: ${{ steps.count.outputs.driver_screens }} screens"
+          echo ""
+          echo "## 📚 Documentation"
+          echo "- Total MD files: ${{ steps.count.outputs.doc_files }}"
+          echo ""
+          echo "## 💻 Code"
+          echo "- Total Dart files: ${{ steps.count.outputs.total_dart }}"
+          echo ""
+          echo "## ✅ Status"
+          echo "- Patient App: ${{ steps.count.outputs.patient_screens }} screens"
+          echo "- Doctor App: ${{ steps.count.outputs.doctor_screens }} screens"
+          echo "- Driver App: ${{ steps.count.outputs.driver_screens }} screens"
+          echo ""
+          echo "Last updated: $(date)"
+      
+      - name: 🎉 Status check complete
+        run: echo "✅ Project status generated successfully"

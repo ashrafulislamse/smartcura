@@ -1,0 +1,12 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/database" },
+    { "path": "packages/identity" },
+    { "path": "packages/observability" },
+    { "path": "packages/policy" },
+    { "path": "packages/storage" },
+    { "path": "apps/api" },
+    { "path": "apps/worker" }
+  ]
+}

@@ -1,0 +1,96 @@
+name: smartcura_driver_app
+description: "SmartCura Driver Mobile App - Delivery & Ambulance Operations Platform"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI & Design
+  cupertino_icons: ^1.0.6
+  google_fonts: ^6.1.0
+  flutter_svg: ^2.0.9
+  cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
+  lottie: ^3.0.0
+
+  # State Management
+  flutter_riverpod: ^2.4.10
+  riverpod_annotation: ^2.3.3
+
+  # Navigation
+  go_router: ^13.0.0
+
+  # Network & API
+  dio: ^5.4.0
+  connectivity_plus: ^7.0.0
+  pretty_dio_logger: ^1.3.1
+
+  # Storage
+  shared_preferences: ^2.2.2
+  flutter_secure_storage: ^9.0.0
+  path_provider: ^2.1.2
+
+  # Location & Maps
+  geolocator: ^11.0.0
+  google_maps_flutter: ^2.5.3
+
+  # Media
+  image_picker: ^1.0.7
+  permission_handler: ^11.2.0
+
+  # Utils
+  intl: ^0.18.1
+  url_launcher: ^6.2.4
+  flutter_dotenv: ^5.1.0
+  uuid: ^4.3.3
+
+  # Charts
+  fl_chart: ^0.66.2
+
+  # Firebase & Push Notifications
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.16.0
+  firebase_messaging: ^14.7.10
+  flutter_local_notifications: ^17.2.3
+  device_info_plus: ^12.4.0
+
+  # Cryptography (SHA-256 for verification document upload integrity)
+  crypto: ^3.0.3
+
+  # SmartCura generated contracts (local path dependency)
+  smartcura_contracts:
+    path: ../api/packages/contracts/generated/dart
+  app_links: ^7.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  build_runner: ^2.4.8
+  riverpod_generator: ^2.3.9
+
+dependency_overrides:
+  # Pin firebase_core to the version used by patient/doctor apps.
+  # firebase_core 2.32.0 is incompatible with firebase_auth 4.16.0 and
+  # triggers the PigeonUserDetails type-cast crash on Android.
+  firebase_core: 2.27.0
+  # Pin firebase_auth_platform_interface to 7.1.8 to match the Dart pigeon
+  # interface baked into the firebase_auth 4.16.0 AAR. 7.3.0 changes the
+  # PigeonUserDetails encode() shape (drops the .encode() call on userInfo),
+  # so the native side still emits the 7.1.8 shape and Dart 7.3.0 cannot
+  # decode it -- raising the "List<Object?> is not a subtype of PigeonUserDetails"
+  # cast error on sign-in. Patient/doctor apps work because they pin 7.1.8.
+  firebase_auth_platform_interface: 7.1.8
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/animations/
+    - assets/illustrations/

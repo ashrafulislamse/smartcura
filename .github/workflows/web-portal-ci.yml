@@ -1,0 +1,77 @@
+name: Web Portal CI
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'apps/web-portal/**'
+      - '.github/workflows/web-portal-ci.yml'
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'apps/web-portal/**'
+
+concurrency:
+  group: web-portal-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck-lint-build:
+    name: Type-check, Lint, and Build Portal
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: apps/web-portal
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          # No package-lock.json is tracked for the portal, so dependency caching is disabled.
+          cache: ''
+
+      - name: Install pinned portal dependencies
+        # No package-lock.json is tracked for the portal (it is ignored by root
+        # .gitignore), so npm install is used instead of npm ci.
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      # Enable with the repository variable PORTAL_SMOKE_ENABLED=true after a
+      # portal/API environment with the fixture identity is available. Keeping
+      # this opt-in prevents CI from claiming an authenticated smoke pass without
+      # a backend session service.
+      - name: Install Playwright browser
+        if: ${{ vars.PORTAL_SMOKE_ENABLED == 'true' }}
+        run: npx playwright install --with-deps chromium
+
+      - name: Type-check
+        run: npm run type-check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Portal route and mock audit
+        run: npm run audit
+
+      - name: Browser portal smoke checks
+        if: ${{ vars.PORTAL_SMOKE_ENABLED == 'true' }}
+        env:
+          NEXT_PUBLIC_DEV_IDENTITY_TOKEN: local-fixture-token-not-for-production
+          PLAYWRIGHT_BASE_URL: ${{ vars.PORTAL_SMOKE_BASE_URL || 'http://127.0.0.1:4000' }}
+          PLAYWRIGHT_SKIP_WEBSERVER: '1'
+        run: npm run test:e2e
+
+      - name: Upload browser smoke artifacts
+        if: ${{ always() && vars.PORTAL_SMOKE_ENABLED == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: portal-smoke-artifacts
+          path: apps/web-portal/test-results/
+          if-no-files-found: ignore

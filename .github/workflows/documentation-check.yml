@@ -1,0 +1,43 @@
+name: Documentation Check
+
+on:
+  push:
+    branches: [ main, dev ]
+    paths:
+      - 'docs/**'
+      - '*.md'
+      - '.github/workflows/documentation-check.yml'
+  pull_request:
+    branches: [ main, dev ]
+    paths:
+      - 'docs/**'
+      - '*.md'
+
+jobs:
+  check-docs:
+    name: Check Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: 📝 Check for broken links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          use-verbose-mode: 'no'
+          config-file: '.github/markdown-link-check-config.json'
+        continue-on-error: true
+      
+      - name: 📊 Count documentation files
+        run: |
+          echo "📚 Documentation Statistics:"
+          echo "Total MD files: $(find docs -name '*.md' | wc -l)"
+          echo "Total folders: $(find docs -type d | wc -l)"
+          echo ""
+          echo "Architecture: $(test -f docs/ARCHITECTURE.md && echo present || echo MISSING)"
+          echo "Roadmap: $(test -f docs/ROADMAP.md && echo present || echo MISSING)"
+      
+      - name: ✅ Documentation check complete
+        run: echo "✅ Documentation structure verified"

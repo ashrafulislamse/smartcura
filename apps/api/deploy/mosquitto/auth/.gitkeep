@@ -1,0 +1,4 @@
+# This directory is bind-mounted into the mosquitto container at
+# /mosquitto/config/auth. It holds:
+#   - acl    (tracked in git — the MQTT access control list)
+#   - passwd (created by ../setup-mqtt-auth.sh — gitignored, contains hashed credentials)

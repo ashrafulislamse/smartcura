@@ -1,0 +1,111 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- WebRTC / LiveKit permissions for video and audio consultations. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+    <!-- BLE scanning and proximity pairing (Android 12+ needs BLUETOOTH_SCAN,
+         and pre-12 needs ACCESS_FINE_LOCATION to return scan results). -->
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
+    <!-- Hardware features for WebRTC (optional but recommended). -->
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-feature android:name="android.hardware.microphone" android:required="false"/>
+
+    <!-- Health Connect permissions for reading vitals from smartwatches.
+         All three test watches (Amazfit, Xiaomi Mi Band, Samsung Galaxy Watch)
+         sync to Google Health Connect via their companion apps. -->
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE"/>
+    <uses-permission android:name="android.permission.health.READ_OXYGEN_SATURATION"/>
+    <uses-permission android:name="android.permission.health.READ_BODY_TEMPERATURE"/>
+    <uses-permission android:name="android.permission.health.READ_BLOOD_PRESSURE"/>
+    <uses-permission android:name="android.permission.health.READ_WEIGHT"/>
+    <uses-permission android:name="android.permission.health.READ_BLOOD_GLUCOSE"/>
+    <uses-permission android:name="android.permission.health.READ_RESPIRATORY_RATE"/>
+
+    <!-- Activity / wellness metrics from Health Connect (steps, distance, energy, sleep). -->
+    <uses-permission android:name="android.permission.health.READ_STEPS"/>
+    <uses-permission android:name="android.permission.health.READ_DISTANCE"/>
+    <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED"/>
+    <uses-permission android:name="android.permission.health.READ_BASAL_METABOLIC_RATE"/>
+    <uses-permission android:name="android.permission.health.READ_SLEEP"/>
+
+    <!-- POST_NOTIFICATIONS is required on Android 13+ (API 33+) to display
+         notifications. The FCM service requests runtime permission via
+         FirebaseMessaging.instance.requestPermission, but the manifest
+         declaration is needed for the system to grant it. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+    <!-- Health Connect requires the app to declare what data types it reads,
+         so the system can show a rational permission dialog to the user. -->
+    <queries>
+        <package android:name="com.google.android.apps.healthdata"/>
+    </queries>
+
+    <application
+        android:label="SmartCura Patient"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <!-- Specifies an Android theme to apply to this Activity as soon as
+                 the Android process has started. This theme is visible to the user
+                 while the Flutter UI initializes. After that, this theme continues
+                 to determine the Window background behind the Flutter UI. -->
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
+              />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- Makes SmartCura discoverable in the Health Connect "App permissions" list
+                 and allows opening the privacy policy / permission usage screen. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE"/>
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS"/>
+            </intent-filter>
+            <!-- smartcura:// deep links — notification taps and external links.
+                 Any host is accepted; the DeepLinkHandler validates the host
+                 (prescriptions, pharmacy-orders, appointments, conversations,
+                 notifications) and the id before routing. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="smartcura"/>
+            </intent-filter>
+        </activity>
+        <!-- Don't delete the meta-data below.
+             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+    <!-- Required to query activities that can process text, see:
+         https://developer.android.com/training/package-visibility and
+         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+
+         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
+</manifest>

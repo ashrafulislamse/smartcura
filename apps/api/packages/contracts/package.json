@@ -1,0 +1,15 @@
+{
+  "name": "@smartcura/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node scripts/validate-contracts.mjs",
+    "generate": "node scripts/generate-models.mjs",
+    "compile": "node scripts/check-generated-models.mjs",
+    "check": "npm run validate && npm run generate && npm run compile"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

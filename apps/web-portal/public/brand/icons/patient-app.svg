@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none" role="img" aria-label="SmartCura Patient app icon">
+  <title>SmartCura Patient — app icon</title>
+  <!--
+    Patient app: the master mark (heart + ECG) on the patient blue tile.
+    Meaning: care (heart) watched over by live, connected monitoring (pulse).
+    Tile is full-bleed (iOS/Android apply their own mask); glyph sits inside the
+    adaptive-icon safe zone. Platform primary: #2563EB.
+  -->
+  <defs>
+    <linearGradient id="ptbg" x1="140" y1="60" x2="900" y2="1010" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="0.55" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#1E3A8A"/>
+    </linearGradient>
+    <radialGradient id="ptglow" cx="330" cy="240" r="640" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#ptbg)"/>
+  <rect width="1024" height="1024" fill="url(#ptglow)"/>
+  <g stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M496 386 C470 268 330 238 268 330 C234 380 232 436 252 484" stroke="#FFFFFF" stroke-width="62"/>
+    <path d="M528 386 C554 268 694 238 756 330 C790 380 792 436 772 484" stroke="#FFFFFF" stroke-width="62"/>
+    <path d="M292 596 C356 690 440 762 512 812 C584 762 668 690 732 596" stroke="#FFFFFF" stroke-width="62"/>
+    <path d="M132 540 H372 L396 562 L452 330 L508 678 L556 540 H586 C600 472 648 472 662 540 H892" stroke="#67E8F9" stroke-width="54"/>
+  </g>
+</svg>

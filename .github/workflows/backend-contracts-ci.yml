@@ -1,0 +1,45 @@
+name: Backend Contracts CI
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'apps/api/packages/contracts/**'
+      - 'apps/api/docs/**'
+      - '.github/workflows/backend-contracts-ci.yml'
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'apps/api/packages/contracts/**'
+      - 'apps/api/docs/**'
+      - '.github/workflows/backend-contracts-ci.yml'
+
+jobs:
+  validate-generate-compile:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.19.0'
+          cache: npm
+          cache-dependency-path: apps/api/package-lock.json
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.12.2'
+      - name: Activate pinned npm
+        run: npm install --global npm@10.9.2 --ignore-scripts --no-audit --no-fund
+      - name: Install pinned backend workspace
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Validate, generate, and compile contracts
+        run: npm run contracts:check
+      - name: Verify generated outputs are committed
+        run: |
+          git diff --exit-code -- apps/api/packages/contracts/generated/typescript/models.ts apps/api/packages/contracts/generated/dart/lib/smartcura_contracts.dart
+          test -z "$(git ls-files --others --exclude-standard -- apps/api/packages/contracts/generated/typescript/models.ts apps/api/packages/contracts/generated/dart/lib/smartcura_contracts.dart)"

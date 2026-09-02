@@ -1,0 +1,20 @@
+# LiveKit server configuration for self-hosted SmartCura production.
+#
+# This is a minimal/demo-ready configuration. For high-traffic production, expand
+# the rtc.udp_port into a full port range (e.g. 50000-60000) and adjust the firewall.
+port: 7880
+bind_addresses:
+  - ""
+
+rtc:
+  tcp_port: 7881
+  udp_port: 7882
+  use_external_ip: true
+
+redis:
+  address: redis:6379
+  db: 0
+
+logging:
+  json: false
+  level: info

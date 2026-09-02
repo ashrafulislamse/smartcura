@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none" role="img" aria-label="SmartCura Doctor app icon">
+  <title>SmartCura Doctor — app icon</title>
+  <!--
+    Doctor app: stethoscope on the doctor teal tile.
+    Meaning: clinical authority and bedside expertise; the mint cross on the chest
+    piece marks it as medical. The tube's lower run carries the family S-curve.
+    Platform primary: #0F766E.
+  -->
+  <defs>
+    <linearGradient id="drbg" x1="140" y1="60" x2="900" y2="1010" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#14B8A6"/>
+      <stop offset="0.55" stop-color="#0F766E"/>
+      <stop offset="1" stop-color="#134E4A"/>
+    </linearGradient>
+    <radialGradient id="drglow" cx="330" cy="240" r="640" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#drbg)"/>
+  <rect width="1024" height="1024" fill="url(#drglow)"/>
+  <g stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#FFFFFF">
+    <!-- left and right tubes converging -->
+    <path d="M330 186 C322 320 344 446 446 506 C478 524 500 546 512 584" stroke-width="60"/>
+    <path d="M694 186 C702 320 680 446 578 506 C546 524 524 546 512 584" stroke-width="60"/>
+    <!-- single tube into the chest piece -->
+    <path d="M512 584 C512 636 520 648 548 660" stroke-width="60"/>
+    <!-- chest piece ring -->
+    <circle cx="624" cy="736" r="108" stroke-width="60"/>
+  </g>
+  <!-- mint medical cross on the chest piece -->
+  <g stroke="#99F6E4" stroke-width="32" stroke-linecap="round">
+    <path d="M624 698 V774"/>
+    <path d="M586 736 H662"/>
+  </g>
+</svg>

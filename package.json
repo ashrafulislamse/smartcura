@@ -1,0 +1,39 @@
+{
+  "name": "smartcura",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SmartCura integrated smart healthcare platform monorepo",
+  "packageManager": "npm@10.9.2",
+  "scripts": {
+    "build:api": "cd apps/api && npm run build",
+    "build:portal": "cd apps/web-portal && npm run build",
+    "test": "cd apps/api && npm test",
+    "check": "cd apps/api && npm run check",
+    "type-check": "cd apps/api && npm run type-check",
+    "type-check:portal": "cd apps/web-portal && npm run type-check",
+    "dev:api": "cd apps/api && npm run dev:api",
+    "dev:worker": "cd apps/api && npm run dev:worker",
+    "dev:portal": "cd apps/web-portal && npm run dev",
+    "db:migrate": "cd apps/api && npm run db:migrate",
+    "db:generate": "cd apps/api && npm run db:generate",
+    "contracts:check": "cd apps/api && npm run contracts:check"
+  },
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://ashrafulislamse@github.com/ashrafulislamse/smartcura.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ashrafulislamse/smartcura/issues"
+  },
+  "homepage": "https://github.com/ashrafulislamse/smartcura#readme",
+  "dependencies": {
+    "mqtt": "^5.15.2"
+  }
+}

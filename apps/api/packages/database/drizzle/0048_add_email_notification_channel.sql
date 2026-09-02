@@ -1,0 +1,23 @@
+-- Add `email` to the `notification_channel` enum.
+--
+-- The notification_preferences and notification_deliveries tables both carry
+-- `notification_channel`, which until now held only `in_app` and `push`. This
+-- migration adds `email` as a third channel so the worker can enqueue and settle
+-- transactional email deliveries through the same notification pipeline.
+--
+-- WHY A NEW CHANNEL RATHER THAN A SEPARATE TABLE. The notification_deliveries
+-- unique index `(notification_id, channel)` already guarantees one row per channel
+-- per notification, and the work index picks up push rows by status. Adding `email`
+-- to the same enum lets the email handler reuse loadEmailWork/settleEmail, which are
+-- channel-scoped twins of the push methods, without a parallel table or a new
+-- outbox aggregate type. The in_app preference CHECK (`channel <> 'in_app' OR
+-- enabled`) does not mention email, so an email preference can be disabled, which
+-- is correct: email is opt-in by default (createNotification treats a missing email
+-- preference row as disabled), unlike in_app which cannot be turned off.
+--
+-- PostgreSQL cannot use a new enum value in the transaction that added it, so the
+-- value is added here and used by the running application afterwards. The migrator
+-- applies one migration per transaction (see migrate.ts), so no split migration is
+-- needed.
+
+ALTER TYPE "public"."notification_channel" ADD VALUE IF NOT EXISTS 'email' AFTER 'push';

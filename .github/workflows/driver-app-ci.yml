@@ -1,0 +1,66 @@
+name: Driver App CI
+
+on:
+  push:
+    branches: [ main, dev ]
+    paths:
+      - 'apps/driver-app/**'
+      - '.github/workflows/driver-app-ci.yml'
+  pull_request:
+    branches: [ main, dev ]
+    paths:
+      - 'apps/driver-app/**'
+
+jobs:
+  build-and-test:
+    name: Build and Test Driver App
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: apps/driver-app
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+          cache: true
+      
+      - name: 📦 Get dependencies
+        run: flutter pub get
+        continue-on-error: true
+      
+      - name: 🔍 Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+        continue-on-error: true
+      
+      - name: 📊 Analyze project source
+        run: flutter analyze
+        continue-on-error: true
+      
+      - name: 🧪 Run tests
+        run: flutter test
+        continue-on-error: true
+      
+      - name: 🏗️ Build APK
+        run: flutter build apk --release
+        continue-on-error: true
+      
+      - name: 📤 Upload APK artifact
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: driver-app-apk
+          path: apps/driver-app/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 7

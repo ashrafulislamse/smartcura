@@ -1,0 +1,38 @@
+{
+  "name": "smartcura-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@10.9.2",
+  "engines": {
+    "node": ">=22.19.0 <25"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "type-check": "tsc -b --pretty false",
+    "contracts:check": "npm run check --workspace=@smartcura/contracts",
+    "db:generate": "npm run generate --workspace=@smartcura/database",
+    "db:migrate": "npm run migrate --workspace=@smartcura/database",
+    "db:probe": "npm run probe --workspace=@smartcura/database",
+    "check": "npm run contracts:check && npm run type-check && npm test",
+    "test": "tsx --tsconfig tsconfig.base.json --test test/care-access.test.ts test/doctor-discovery.test.ts test/private-files.test.ts test/appointments.test.ts test/consultations.test.ts test/iot.test.ts test/ai.test.ts test/health-context.test.ts test/longitudinal-analysis.test.ts test/keyword-retriever.test.ts test/ai-pipeline-integration.test.ts test/phi-redaction.test.ts test/pharmacy.test.ts test/dispatch.test.ts test/administration.test.ts test/dead-letter-replay.test.ts test/schema-compatibility.test.ts test/csrf-coverage.test.ts test/rate-limiting.test.ts test/route-contract.test.ts test/check-constraint-null.test.ts test/production-dependency-graph.test.ts test/step-up-matrix.test.ts test/workstream-f.test.ts test/notification-email.test.ts test/notification-push.test.ts test/chat-gateway.test.ts test/risk-scoring.test.ts",
+    "dev:api": "tsx watch apps/api/src/main.ts",
+    "dev:worker": "tsx watch apps/worker/src/main.ts",
+    "start:api": "node apps/api/dist/main.js",
+    "start:worker": "node apps/worker/dist/main.js"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "@types/nodemailer": "8.0.1",
+    "tsx": "4.23.1",
+    "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "mqtt": "5.10.1",
+    "nodemailer": "7.0.13"
+  }
+}

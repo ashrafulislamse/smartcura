@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Branded splash screen with gradient background -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Gradient background matching app theme -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:startColor="#2563EB"
+                android:endColor="#14B8A6"
+                android:type="linear" />
+        </shape>
+    </item>
+
+    <!-- Optional: Add your logo here -->
+    <!-- <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@mipmap/launch_image" />
+    </item> -->
+</layer-list>

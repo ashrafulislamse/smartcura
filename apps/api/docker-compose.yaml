@@ -1,0 +1,192 @@
+# Coolify / Docker Compose entry point for the SmartCura backend.
+#
+# This stack is configured for a demo/staging deployment: deterministic/mock providers are
+# allowed, so you can deploy without Firebase, R2, LiveKit, FCM or a real payment gateway.
+# For production with real providers, use compose.prod.yaml.
+#
+# Copy .env.example to .env, fill in the secrets, then run:
+#   docker compose up -d
+#   docker compose run --rm api npm run db:migrate
+name: smartcura
+
+services:
+  postgres:
+    image: postgres:18.4-alpine3.23@sha256:6ae038add203ffd3e33c20dfff45f6d714afa194facbf0f533b9204cb63cc5ef
+    environment:
+      POSTGRES_DB: smartcura
+      POSTGRES_USER: smartcura
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    # PostgreSQL 18+ moved its data directory to /var/lib/postgresql (PGDATA is
+    # /var/lib/postgresql/18/docker); mounting the legacy /var/lib/postgresql/data
+    # path makes the postgres:18 container start then immediately go unhealthy.
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U smartcura -d smartcura']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  clamav:
+    image: clamav/clamav:latest
+    volumes:
+      - clamav_data:/var/lib/clamav
+    healthcheck:
+      test: ['CMD', 'clamdscan', '--ping', '1']
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 120s
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  mosquitto:
+    # Custom image: see deploy/mosquitto/Dockerfile. The config and ACL are baked
+    # in; the password file is generated at runtime from SMARTCURA_MQTT_PASSWORD.
+    # This avoids bind-mount shadowing and the musl EAI_AGAIN listener bug (fixed
+    # by binding to 0.0.0.0 in mosquitto.conf).
+    build:
+      context: deploy/mosquitto
+      dockerfile: Dockerfile
+    environment:
+      SMARTCURA_MQTT_PASSWORD: ${SMARTCURA_MQTT_PASSWORD:-smartcura-mqtt-demo}
+    volumes:
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_logs:/mosquitto/log
+    ports:
+      - '1883:1883'
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  api:
+    image: smartcura-api:coolify
+    build:
+      # Coolify evaluates this file from apps/api, which is the workspace root.
+      context: .
+      dockerfile: Dockerfile
+    # Run migrations as part of API startup, then start the server. This avoids
+    # a separate migrate container whose expected exit triggers Coolify to
+    # restart the entire compose project.
+    command: ["dumb-init", "sh", "-c", "node packages/database/dist/migrate.js && node apps/api/dist/main.js"]
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      SMARTCURA_BUILD_VERSION: ${SMARTCURA_BUILD_VERSION:-0.1.0}
+      SMARTCURA_API_HOST: 0.0.0.0
+      SMARTCURA_API_PORT: 3000
+      SMARTCURA_API_ALLOWED_ORIGINS: ${SMARTCURA_API_ALLOWED_ORIGINS:-http://localhost:3001}
+      SMARTCURA_SESSION_CSRF_SECRET: ${SMARTCURA_SESSION_CSRF_SECRET:-change-this-in-production-at-least-32-characters-long}
+      DATABASE_URL: postgresql://smartcura:${POSTGRES_PASSWORD}@postgres:5432/smartcura?sslmode=disable
+      SMARTCURA_IDENTITY_ADAPTER: ${SMARTCURA_IDENTITY_ADAPTER:-local}
+      SMARTCURA_FIREBASE_PROJECT_ID: ${SMARTCURA_FIREBASE_PROJECT_ID:-}
+      SMARTCURA_VIDEO_ADAPTER: ${SMARTCURA_VIDEO_ADAPTER:-deterministic}
+      SMARTCURA_LIVEKIT_URL: ${SMARTCURA_LIVEKIT_URL:-}
+      SMARTCURA_LIVEKIT_API_KEY: ${SMARTCURA_LIVEKIT_API_KEY:-}
+      SMARTCURA_LIVEKIT_API_SECRET: ${SMARTCURA_LIVEKIT_API_SECRET:-}
+      SMARTCURA_PUSH_TOKEN_ENCRYPTION_KEY: ${SMARTCURA_PUSH_TOKEN_ENCRYPTION_KEY:-0000000000000000000000000000000000000000000000000000000000000000}
+      SMARTCURA_AI_PROVIDER: ${SMARTCURA_AI_PROVIDER:-openai}
+      SMARTCURA_AI_API_KEY: ${SMARTCURA_AI_API_KEY:?AI API key required}
+      SMARTCURA_AI_BASE_URL: ${SMARTCURA_AI_BASE_URL:-https://api.openai.com/v1}
+      SMARTCURA_AI_MODEL: ${SMARTCURA_AI_MODEL:-gpt-4o-mini}
+      SMARTCURA_AI_JSON_MODE: ${SMARTCURA_AI_JSON_MODE:-false}
+      SMARTCURA_OBJECT_STORAGE_PROVIDER: ${SMARTCURA_OBJECT_STORAGE_PROVIDER:-memory}
+      SMARTCURA_R2_ACCOUNT_ID: ${SMARTCURA_R2_ACCOUNT_ID:-}
+      SMARTCURA_R2_BUCKET: ${SMARTCURA_R2_BUCKET:-}
+      SMARTCURA_R2_ENDPOINT: ${SMARTCURA_R2_ENDPOINT:-}
+      SMARTCURA_R2_ACCESS_KEY_ID: ${SMARTCURA_R2_ACCESS_KEY_ID:-}
+      SMARTCURA_R2_SECRET_ACCESS_KEY: ${SMARTCURA_R2_SECRET_ACCESS_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clamav:
+        condition: service_healthy
+    ports:
+      - '3000:3000'
+    healthcheck:
+      test: ["CMD", "node", "--eval", "fetch('http://localhost:3000/api/v1/health').then(r => r.ok ? process.exit(0) : process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  worker:
+    image: smartcura-worker:coolify
+    build:
+      # Coolify evaluates this file from apps/api, which is the workspace root.
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      SMARTCURA_BUILD_VERSION: ${SMARTCURA_BUILD_VERSION:-0.1.0}
+      DATABASE_URL: postgresql://smartcura:${POSTGRES_PASSWORD}@postgres:5432/smartcura?sslmode=disable
+      SMARTCURA_WORKER_POLL_INTERVAL_MS: ${SMARTCURA_WORKER_POLL_INTERVAL_MS:-5000}
+      SMARTCURA_WORKER_LEASE_MS: ${SMARTCURA_WORKER_LEASE_MS:-30000}
+      SMARTCURA_WORKER_BATCH_SIZE: ${SMARTCURA_WORKER_BATCH_SIZE:-10}
+      SMARTCURA_WORKER_MAX_ATTEMPTS: ${SMARTCURA_WORKER_MAX_ATTEMPTS:-10}
+      SMARTCURA_MALWARE_SCANNER: clamav
+      SMARTCURA_CLAMAV_HOST: clamav
+      SMARTCURA_CLAMAV_PORT: 3310
+      SMARTCURA_PAYMENT_PROVIDER: deterministic
+      SMARTCURA_PUSH_PROVIDER: deterministic
+      SMARTCURA_MQTT_URL: ${SMARTCURA_MQTT_URL:-mqtt://mosquitto:1883}
+      SMARTCURA_MQTT_USERNAME: ${SMARTCURA_MQTT_USERNAME:-smartcura-bridge}
+      SMARTCURA_MQTT_PASSWORD: ${SMARTCURA_MQTT_PASSWORD:-smartcura-mqtt-demo}
+      SMARTCURA_MQTT_CLIENT_ID: ${SMARTCURA_MQTT_CLIENT_ID:-smartcura-worker}
+      SMARTCURA_AI_PROVIDER: ${SMARTCURA_AI_PROVIDER:-openai}
+      SMARTCURA_AI_API_KEY: ${SMARTCURA_AI_API_KEY:?AI API key required}
+      SMARTCURA_AI_BASE_URL: ${SMARTCURA_AI_BASE_URL:-https://api.openai.com/v1}
+      SMARTCURA_AI_MODEL: ${SMARTCURA_AI_MODEL:-gpt-4o-mini}
+      SMARTCURA_AI_JSON_MODE: ${SMARTCURA_AI_JSON_MODE:-false}
+      SMARTCURA_OBJECT_STORAGE_PROVIDER: ${SMARTCURA_OBJECT_STORAGE_PROVIDER:-memory}
+      SMARTCURA_R2_ACCOUNT_ID: ${SMARTCURA_R2_ACCOUNT_ID:-}
+      SMARTCURA_R2_BUCKET: ${SMARTCURA_R2_BUCKET:-}
+      SMARTCURA_R2_ENDPOINT: ${SMARTCURA_R2_ENDPOINT:-}
+      SMARTCURA_R2_ACCESS_KEY_ID: ${SMARTCURA_R2_ACCESS_KEY_ID:-}
+      SMARTCURA_R2_SECRET_ACCESS_KEY: ${SMARTCURA_R2_SECRET_ACCESS_KEY:-}
+    command: node apps/worker/dist/main.js
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clamav:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+volumes:
+  postgres_data:
+  redis_data:
+  mosquitto_data:
+  mosquitto_logs:
+  clamav_data:
+
+networks:
+  smartcura:
+    driver: bridge

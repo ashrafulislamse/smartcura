@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="SmartCura SC monogram">
+  <title>SmartCura SC monogram badge</title>
+  <!--
+    SC monogram: geometric S (two stacked 130-radius arcs) and C (215-radius arc,
+    opening faces the S), unified by a pulse tick below. For avatars, social, loading
+    screens and anywhere the full mark is too detailed.
+  -->
+  <defs>
+    <linearGradient id="scbg" x1="120" y1="60" x2="920" y2="1000" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1E40AF"/>
+      <stop offset="0.6" stop-color="#1E3A8A"/>
+      <stop offset="1" stop-color="#172554"/>
+    </linearGradient>
+    <radialGradient id="scglow" cx="320" cy="230" r="640" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="224" fill="url(#scbg)"/>
+  <rect width="1024" height="1024" rx="224" fill="url(#scglow)"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="92" stroke-linecap="round">
+    <!-- S: upper arc counter-clockwise, lower arc clockwise -->
+    <path d="M400 382 A130 130 0 1 0 270 512 A130 130 0 1 1 140 642"/>
+    <!-- C: 290 degree arc opening left, toward the S -->
+    <path d="M524 389 A215 215 0 1 1 524 635"/>
+  </g>
+  <!-- pulse tick unifying the letters -->
+  <path d="M372 866 H452 L482 812 L516 918 L544 866 H652" fill="none" stroke="#67E8F9" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,29 @@
+{
+	email {$ACME_EMAIL}
+}
+
+# SmartCura API — api.smartcura.app
+api.{$DOMAIN} {
+	reverse_proxy api:3000
+}
+
+# MQTT broker — mqtt.smartcura.app
+# Raw MQTT (port 1883) is exposed directly by the mosquitto container, not
+# proxied through Caddy. Caddy v2 cannot proxy raw TCP without the caddy-l4
+# plugin. For TLS-encrypted MQTT (port 8883), add the layer4 plugin or use
+# mosquitto's built-in TLS with certificates from the ACME email above.
+# mqtt.{$DOMAIN} {
+# 	...
+# }
+
+# Next.js portal — portal.smartcura.app
+# (add a `portal` service to compose.prod.yaml when the portal is deployed in this stack)
+# portal.{$DOMAIN} {
+# 	reverse_proxy portal:3000
+# }
+
+# LiveKit signalling — livekit.smartcura.app
+# (add a `livekit` service to compose.prod.yaml when video is enabled)
+# livekit.{$DOMAIN} {
+# 	reverse_proxy livekit:7880
+# }

@@ -1,0 +1,68 @@
+# SmartCura Doctor App - GitHub Push Commands
+
+## Step 1: Initialize Git (if not already done)
+git init
+
+## Step 2: Add remote repository
+git remote add origin https://github.com/ashrafulislamse/smartcura-doctor-app.git
+
+## Step 3: Configure Git user
+git config user.name "Ashraful Islam"
+git config user.email "ashrafulislamse@gmail.com"
+
+## Step 4: Add all files
+git add .
+
+## Step 5: Commit with detailed message
+git commit -m "feat: complete MVP with 22 screens - v1.0.0
+
+- Add authentication flow (6 screens)
+- Add dashboard and notifications (2 screens)
+- Add appointment management (3 screens)
+- Add consultation features (4 screens)
+- Add messaging system (1 screen)
+- Add patient management (2 screens)
+- Add profile and settings (4 screens)
+- Implement 5-tab bottom navigation
+- Add professional README and documentation
+- Set up project structure with Clean Architecture
+- Configure theme with teal color (#0F766E)
+- Add LICENSE, VERSION, and CHANGELOG"
+
+## Step 6: Create version tag
+git tag -a v1.0.0 -m "Release v1.0.0 - MVP Complete
+
+SmartCura Doctor App MVP with 22 screens:
+- Complete authentication flow
+- Dashboard with stats and quick actions
+- Appointment and schedule management
+- Video and chat consultations
+- Patient management with detailed profiles
+- Profile, settings, and help screens
+- Professional UI with teal theme
+- Clean Architecture structure
+- Ready for backend integration"
+
+## Step 7: Set main branch and push
+git branch -M main
+git push -u origin main
+
+## Step 8: Push tags
+git push origin --tags
+
+## Verify push
+git remote -v
+git log --oneline
+git tag
+
+## Repository URL
+https://github.com/ashrafulislamse/smartcura-doctor-app
+
+## Future commits (after initial push)
+git add .
+git commit -m "your commit message"
+git push
+
+## Create new version tag (example for v1.1.0)
+git tag -a v1.1.0 -m "Release v1.1.0 - Description"
+git push origin v1.1.0

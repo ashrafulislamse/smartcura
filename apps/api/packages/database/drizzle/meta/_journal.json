@@ -1,0 +1,454 @@
+{
+    "version": "7",
+    "dialect": "postgresql",
+    "entries": [
+        {
+            "idx": 0,
+            "version": "7",
+            "when": 1785009706292,
+            "tag": "0000_public_scarlet_spider",
+            "breakpoints": true
+        },
+        {
+            "idx": 1,
+            "version": "7",
+            "when": 1785009738906,
+            "tag": "0001_bored_nightcrawler",
+            "breakpoints": true
+        },
+        {
+            "idx": 2,
+            "version": "7",
+            "when": 1785009796775,
+            "tag": "0002_dizzy_firebrand",
+            "breakpoints": true
+        },
+        {
+            "idx": 3,
+            "version": "7",
+            "when": 1785067799641,
+            "tag": "0003_smooth_ender_wiggin",
+            "breakpoints": true
+        },
+        {
+            "idx": 4,
+            "version": "7",
+            "when": 1785069916442,
+            "tag": "0004_aromatic_clint_barton",
+            "breakpoints": true
+        },
+        {
+            "idx": 5,
+            "version": "7",
+            "when": 1785071317818,
+            "tag": "0005_serious_wendell_rand",
+            "breakpoints": true
+        },
+        {
+            "idx": 6,
+            "version": "7",
+            "when": 1785072400717,
+            "tag": "0006_lying_preak",
+            "breakpoints": true
+        },
+        {
+            "idx": 7,
+            "version": "7",
+            "when": 1785073741073,
+            "tag": "0007_odd_stature",
+            "breakpoints": true
+        },
+        {
+            "idx": 8,
+            "version": "7",
+            "when": 1785074710320,
+            "tag": "0008_youthful_shatterstar",
+            "breakpoints": true
+        },
+        {
+            "idx": 9,
+            "version": "7",
+            "when": 1785110000000,
+            "tag": "0009_global_membership_authority",
+            "breakpoints": true
+        },
+        {
+            "idx": 10,
+            "version": "7",
+            "when": 1785113600000,
+            "tag": "0010_drop_membership_wildcard",
+            "breakpoints": true
+        },
+        {
+            "idx": 11,
+            "version": "7",
+            "when": 1785200000000,
+            "tag": "0011_profile_verification_consent",
+            "breakpoints": true
+        },
+        {
+            "idx": 12,
+            "version": "7",
+            "when": 1785286400000,
+            "tag": "0012_verification_and_files",
+            "breakpoints": true
+        },
+        {
+            "idx": 13,
+            "version": "7",
+            "when": 1785286500000,
+            "tag": "0013_availability_and_appointments",
+            "breakpoints": true
+        },
+        {
+            "idx": 14,
+            "version": "7",
+            "when": 1785286600000,
+            "tag": "0014_iot_devices_and_readings",
+            "breakpoints": true
+        },
+        {
+            "idx": 15,
+            "version": "7",
+            "when": 1785286700000,
+            "tag": "0015_patient_profile_data",
+            "breakpoints": true
+        },
+        {
+            "idx": 16,
+            "version": "7",
+            "when": 1785286800000,
+            "tag": "0016_drop_orphaned_profile_detail_tables",
+            "breakpoints": true
+        },
+        {
+            "idx": 17,
+            "version": "7",
+            "when": 1785286900000,
+            "tag": "0017_doctor_discovery_and_reviews",
+            "breakpoints": true
+        },
+        {
+            "idx": 18,
+            "version": "7",
+            "when": 1785287000000,
+            "tag": "0018_appointment_canonical_vocabulary",
+            "breakpoints": true
+        },
+        {
+            "idx": 19,
+            "version": "7",
+            "when": 1785287100000,
+            "tag": "0019_appointment_lifecycle_hardening",
+            "breakpoints": true
+        },
+        {
+            "idx": 20,
+            "version": "7",
+            "when": 1785287200000,
+            "tag": "0020_consultations_messaging_prescriptions",
+            "breakpoints": true
+        },
+        {
+            "idx": 21,
+            "version": "7",
+            "when": 1785287300000,
+            "tag": "0021_iot_canonical_vocabulary",
+            "breakpoints": true
+        },
+        {
+            "idx": 22,
+            "version": "7",
+            "when": 1785287400000,
+            "tag": "0022_iot_operations_and_firmware",
+            "breakpoints": true
+        },
+        {
+            "idx": 23,
+            "version": "7",
+            "when": 1785287500000,
+            "tag": "0023_governed_ai_clinical_support",
+            "breakpoints": true
+        },
+        {
+            "idx": 24,
+            "version": "7",
+            "when": 1785287600000,
+            "tag": "0024_pharmacy_and_inventory",
+            "breakpoints": true
+        },
+        {
+            "idx": 25,
+            "version": "7",
+            "when": 1785287700000,
+            "tag": "0025_driver_dispatch_and_delivery",
+            "breakpoints": true
+        },
+        {
+            "idx": 26,
+            "version": "7",
+            "when": 1785287800000,
+            "tag": "0026_fix_ai_disclaimer_check",
+            "breakpoints": true
+        },
+        {
+            "idx": 27,
+            "version": "7",
+            "when": 1785287900000,
+            "tag": "0027_seed_ai_prompt_templates",
+            "breakpoints": true
+        },
+        {
+            "idx": 28,
+            "version": "7",
+            "when": 1785288900000,
+            "tag": "0028_emergency_operations",
+            "breakpoints": true
+        },
+        {
+            "idx": 29,
+            "version": "7",
+            "when": 1785289900000,
+            "tag": "0029_fix_emergency_null_checks",
+            "breakpoints": true
+        },
+        {
+            "idx": 30,
+            "version": "7",
+            "when": 1785290900000,
+            "tag": "0030_finance_support_administration",
+            "breakpoints": true
+        },
+        {
+            "idx": 31,
+            "version": "7",
+            "when": 1785291900000,
+            "tag": "0031_controlled_substance_witness",
+            "breakpoints": true
+        },
+        {
+            "idx": 32,
+            "version": "7",
+            "when": 1785292900000,
+            "tag": "0032_withdrawal_status_vocabulary",
+            "breakpoints": true
+        },
+        {
+            "idx": 33,
+            "version": "7",
+            "when": 1785293900000,
+            "tag": "0033_withdrawal_settlement_controls",
+            "breakpoints": true
+        },
+        {
+            "idx": 34,
+            "version": "7",
+            "when": 1785294900000,
+            "tag": "0034_stage8_stage9_api_surfaces",
+            "breakpoints": true
+        },
+        {
+            "idx": 35,
+            "version": "7",
+            "when": 1785295900000,
+            "tag": "0035_stage11_content_broadcasts",
+            "breakpoints": true
+        },
+        {
+            "idx": 36,
+            "version": "7",
+            "when": 1785296900000,
+            "tag": "0036_stage11_custom_roles",
+            "breakpoints": true
+        },
+        {
+            "idx": 37,
+            "version": "7",
+            "when": 1785297900000,
+            "tag": "0037_stage11_settings_maintenance",
+            "breakpoints": true
+        },
+        {
+            "idx": 38,
+            "version": "7",
+            "when": 1785298900000,
+            "tag": "0038_stage11_support_sla",
+            "breakpoints": true
+        },
+        {
+            "idx": 39,
+            "version": "7",
+            "when": 1785299900000,
+            "tag": "0039_schema_compatibility_monotonic",
+            "breakpoints": true
+        },
+        {
+            "idx": 40,
+            "version": "7",
+            "when": 1785300900000,
+            "tag": "0040_dead_letter_replay_history",
+            "breakpoints": true
+        },
+        {
+            "idx": 41,
+            "version": "7",
+            "when": 1785400000000,
+            "tag": "0041_add_openai_ai_provider",
+            "breakpoints": true
+        },
+        {
+            "idx": 42,
+            "version": "7",
+            "when": 1785400100000,
+            "tag": "0042_seed_openai_ai_provider",
+            "breakpoints": true
+        },
+        {
+            "idx": 43,
+            "version": "7",
+            "when": 1785400200000,
+            "tag": "0043_clinical_templates",
+            "breakpoints": true
+        },
+        {
+            "idx": 44,
+            "version": "7",
+            "when": 1785400300000,
+            "tag": "0044_patient_self_read_permissions",
+            "breakpoints": true
+        },
+        {
+            "idx": 45,
+            "version": "7",
+            "when": 1785400400000,
+            "tag": "0045_phone_device_type_and_own_device_read",
+            "breakpoints": true
+        },
+        {
+            "idx": 46,
+            "version": "7",
+            "when": 1785400500000,
+            "tag": "0046_doctor_assigned_device_permissions",
+            "breakpoints": true
+        },
+        {
+            "idx": 47,
+            "version": "7",
+            "when": 1785400600000,
+            "tag": "0047_converge_org_to_organization",
+            "breakpoints": true
+        },
+        {
+            "idx": 48,
+            "version": "7",
+            "when": 1785400700000,
+            "tag": "0048_add_email_notification_channel",
+            "breakpoints": true
+        },
+        {
+            "idx": 49,
+            "version": "7",
+            "when": 1785400800000,
+            "tag": "0049_add_prescription_diagnosis",
+            "breakpoints": true
+        },
+        {
+            "idx": 50,
+            "version": "7",
+            "when": 1785487200000,
+            "tag": "0050_unified_communication",
+            "breakpoints": true
+        },
+        {
+            "idx": 51,
+            "version": "7",
+            "when": 1785487300000,
+            "tag": "0051_grant_patient_prescription_read_own",
+            "breakpoints": true
+        },
+        {
+            "idx": 52,
+            "version": "7",
+            "when": 1785573700000,
+            "tag": "0052_add_health_summary_artifact_type",
+            "breakpoints": true
+        },
+        {
+            "idx": 53,
+            "version": "7",
+            "when": 1785573800000,
+            "tag": "0053_seed_health_summary_prompt_template",
+            "breakpoints": true
+        },
+        {
+            "idx": 54,
+            "version": "7",
+            "when": 1785573900000,
+            "tag": "0054_add_daily_summary_and_trend_analysis_artifact_types",
+            "breakpoints": true
+        },
+        {
+            "idx": 55,
+            "version": "7",
+            "when": 1785574000000,
+            "tag": "0055_seed_daily_summary_and_trend_analysis_prompt_templates",
+            "breakpoints": true
+        },
+        {
+            "idx": 56,
+            "version": "7",
+            "when": 1785574100000,
+            "tag": "0056_add_activity_metrics_to_vital_readings",
+            "breakpoints": true
+        },
+        {
+            "idx": 57,
+            "version": "7",
+            "when": 1785574200000,
+            "tag": "0057_add_activity_metrics_check_constraints",
+            "breakpoints": true
+        },
+        {
+            "idx": 58,
+            "version": "7",
+            "when": 1785574300000,
+            "tag": "0058_add_dispatch_notification_category",
+            "breakpoints": true
+        },
+        {
+            "idx": 59,
+            "version": "7",
+            "when": 1785574400000,
+            "tag": "0059_add_cloudflare_ai_provider_enum",
+            "breakpoints": true
+        },
+        {
+            "idx": 60,
+            "version": "7",
+            "when": 1785574500000,
+            "tag": "0060_seed_cloudflare_ai_model",
+            "breakpoints": true
+        },
+        {
+            "idx": 61,
+            "version": "7",
+            "when": 1785574600000,
+            "tag": "0061_patient_self_device_assign_release_permissions",
+            "breakpoints": true
+        },
+        {
+            "idx": 62,
+            "version": "7",
+            "when": 1785574700000,
+            "tag": "0062_add_vitals_update_notification_category",
+            "breakpoints": true
+        },
+        {
+            "idx": 63,
+            "version": "7",
+            "when": 1785574800000,
+            "tag": "0063_add_profile_avatar",
+            "breakpoints": true
+        }
+    ]
+}

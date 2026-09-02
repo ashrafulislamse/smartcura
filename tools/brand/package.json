@@ -1,0 +1,13 @@
+{
+  "name": "smartcura-brand-tools",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Rasterizes the SVG brand kit (design/brand) into every platform target of the Flutter apps.",
+  "scripts": {
+    "export": "node export-icons.mjs"
+  },
+  "dependencies": {
+    "sharp": "^0.33.5"
+  }
+}

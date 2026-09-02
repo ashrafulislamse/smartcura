@@ -1,0 +1,3514 @@
+{
+  "asyncapi": "3.0.0",
+  "info": {
+    "title": "SmartCura Asynchronous API",
+    "version": "0.1.0",
+    "description": "Stage 0A contract for Socket.IO application events, MQTT device traffic and PostgreSQL transactional-outbox processing."
+  },
+  "defaultContentType": "application/json",
+  "servers": {
+    "socketio": {
+      "host": "api.smartcura.example",
+      "pathname": "/socket.io",
+      "protocol": "wss",
+      "description": "Authenticated Socket.IO transport using the SmartCura session cookie",
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/smartCuraSessionCookie"
+        }
+      ]
+    },
+    "mqtt": {
+      "host": "mqtt.smartcura.example:8883",
+      "protocol": "mqtts",
+      "description": "Mosquitto device broker with one TLS credential and ACL per provisioned device",
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/deviceCredential"
+        }
+      ]
+    },
+    "postgresOutbox": {
+      "host": "postgres:5432",
+      "protocol": "postgresql",
+      "description": "Private transactional outbox table claimed by the worker with SKIP LOCKED; not a public broker",
+      "x-private": true
+    },
+    "redisPubSub": {
+      "host": "redis:6379",
+      "protocol": "redis",
+      "description": "Redis pub/sub bridge between the worker and API WebSocket gateway instances. The worker publishes minimum-necessary chat event projections after processing an outbox row; every gateway instance subscribes and fans out to the matching conversation room. Not a public broker.",
+      "x-private": true
+    }
+  },
+  "channels": {
+    "socketioApp": {
+      "address": "/app",
+      "servers": [
+        {
+          "$ref": "#/servers/socketio"
+        }
+      ],
+      "description": "Socket.IO namespace. User room is joined automatically; resource rooms require a policy-checked subscribe command.",
+      "x-rooms": [
+        "user:{profile_id}",
+        "appointment:{appointment_id}",
+        "conversation:{conversation_id}",
+        "patient:{patient_id}"
+      ],
+      "messages": {
+        "roomSubscribe": {
+          "$ref": "#/components/messages/RoomSubscribe"
+        },
+        "syncRequest": {
+          "$ref": "#/components/messages/SyncRequest"
+        },
+        "syncRequired": {
+          "$ref": "#/components/messages/SyncRequired"
+        },
+        "socketError": {
+          "$ref": "#/components/messages/SocketError"
+        },
+        "sessionRevoked": {
+          "$ref": "#/components/messages/SessionRevoked"
+        },
+        "membershipChanged": {
+          "$ref": "#/components/messages/MembershipChanged"
+        },
+        "appointmentStatusChanged": {
+          "$ref": "#/components/messages/AppointmentStatusChanged"
+        },
+        "messageCreated": {
+          "$ref": "#/components/messages/MessageCreated"
+        },
+        "receiptUpdated": {
+          "$ref": "#/components/messages/ReceiptUpdated"
+        },
+        "vitalReadingRecorded": {
+          "$ref": "#/components/messages/VitalReadingRecorded"
+        },
+        "healthAlertChanged": {
+          "$ref": "#/components/messages/HealthAlertChanged"
+        },
+        "aiReviewChanged": {
+          "$ref": "#/components/messages/AiReviewChanged"
+        },
+        "consultationChanged": {
+          "$ref": "#/components/messages/ConsultationChanged"
+        },
+        "prescriptionChanged": {
+          "$ref": "#/components/messages/PrescriptionChanged"
+        },
+        "aiArtifactChanged": {
+          "$ref": "#/components/messages/AiArtifactChanged"
+        }
+      }
+    },
+    "socketioChat": {
+      "address": "/chat",
+      "servers": [
+        {
+          "$ref": "#/servers/socketio"
+        }
+      ],
+      "description": "Dedicated Socket.IO namespace for real-time consultation chat. A client authenticates with the SmartCura session cookie on the WebSocket handshake, joins the room for a conversation they are an active participant in, and receives push events for new messages, receipt updates, and presence changes. The HTTP send/read endpoints remain the only write path; this namespace is push-only. CSRF does not apply to WebSocket frames, but session authentication is enforced on every connection.",
+      "x-rooms": [
+        "conversation:{conversation_id}"
+      ],
+      "messages": {
+        "chatJoin": {
+          "$ref": "#/components/messages/ChatJoin"
+        },
+        "chatLeave": {
+          "$ref": "#/components/messages/ChatLeave"
+        },
+        "chatTyping": {
+          "$ref": "#/components/messages/ChatTyping"
+        },
+        "chatStopTyping": {
+          "$ref": "#/components/messages/ChatStopTyping"
+        },
+        "chatMessageCreated": {
+          "$ref": "#/components/messages/MessageCreated"
+        },
+        "chatReceiptUpdated": {
+          "$ref": "#/components/messages/ReceiptUpdated"
+        },
+        "chatPresence": {
+          "$ref": "#/components/messages/ChatPresence"
+        }
+      }
+    },
+    "chatEvents": {
+      "address": "chat:events",
+      "servers": [
+        {
+          "$ref": "#/servers/redisPubSub"
+        }
+      ],
+      "description": "Redis pub/sub channel the worker publishes chat fan-out events to and every API WebSocket gateway instance subscribes to. One channel for all chat events; the payload carries its own conversation_id so each instance can fan out to the right room without a per-conversation channel. The payload is the minimum-necessary projection — no message text, which is clinical data an event stream fans out more widely than an authorized read.",
+      "x-private": true,
+      "messages": {
+        "messageCreated": {
+          "$ref": "#/components/messages/MessageCreated"
+        },
+        "receiptUpdated": {
+          "$ref": "#/components/messages/ReceiptUpdated"
+        }
+      }
+    },
+    "mqttVitals": {
+      "address": "smartcura/v1/devices/{deviceId}/vitals",
+      "servers": [
+        {
+          "$ref": "#/servers/mqtt"
+        }
+      ],
+      "parameters": {
+        "deviceId": {
+          "$ref": "#/components/parameters/deviceId"
+        }
+      },
+      "x-qos": 1,
+      "x-retain": false,
+      "messages": {
+        "deviceVitals": {
+          "$ref": "#/components/messages/DeviceVitals"
+        }
+      }
+    },
+    "mqttStatus": {
+      "address": "smartcura/v1/devices/{deviceId}/status",
+      "servers": [
+        {
+          "$ref": "#/servers/mqtt"
+        }
+      ],
+      "parameters": {
+        "deviceId": {
+          "$ref": "#/components/parameters/deviceId"
+        }
+      },
+      "x-qos": 1,
+      "x-retain": true,
+      "description": "Retained latest status/LWT; consumers must evaluate reported_at and never infer clinical truth from it.",
+      "messages": {
+        "deviceStatus": {
+          "$ref": "#/components/messages/DeviceStatus"
+        }
+      }
+    },
+    "mqttCommands": {
+      "address": "smartcura/v1/devices/{deviceId}/commands",
+      "servers": [
+        {
+          "$ref": "#/servers/mqtt"
+        }
+      ],
+      "parameters": {
+        "deviceId": {
+          "$ref": "#/components/parameters/deviceId"
+        }
+      },
+      "x-qos": 1,
+      "x-retain": false,
+      "messages": {
+        "deviceCommand": {
+          "$ref": "#/components/messages/DeviceCommand"
+        }
+      }
+    },
+    "mqttCommandAcks": {
+      "address": "smartcura/v1/devices/{deviceId}/command-acks",
+      "servers": [
+        {
+          "$ref": "#/servers/mqtt"
+        }
+      ],
+      "parameters": {
+        "deviceId": {
+          "$ref": "#/components/parameters/deviceId"
+        }
+      },
+      "x-qos": 1,
+      "x-retain": false,
+      "messages": {
+        "deviceCommandAck": {
+          "$ref": "#/components/messages/DeviceCommandAck"
+        }
+      }
+    },
+    "mqttOta": {
+      "address": "smartcura/v1/devices/{deviceId}/ota",
+      "servers": [
+        {
+          "$ref": "#/servers/mqtt"
+        }
+      ],
+      "parameters": {
+        "deviceId": {
+          "$ref": "#/components/parameters/deviceId"
+        }
+      },
+      "x-qos": 1,
+      "x-retain": false,
+      "messages": {
+        "deviceOta": {
+          "$ref": "#/components/messages/DeviceOta"
+        }
+      }
+    },
+    "postgresOutboxEvents": {
+      "address": "outbox_events",
+      "servers": [
+        {
+          "$ref": "#/servers/postgresOutbox"
+        }
+      ],
+      "description": "Worker claim stream. Domain transaction and outbox row commit atomically; worker routes minimum-necessary projections to Socket.IO, FCM and providers.",
+      "x-claim": "FOR UPDATE SKIP LOCKED with lease, retry, dead-letter and replay",
+      "messages": {
+        "sessionRevoked": {
+          "$ref": "#/components/messages/SessionRevoked"
+        },
+        "membershipChanged": {
+          "$ref": "#/components/messages/MembershipChanged"
+        },
+        "profileChanged": {
+          "$ref": "#/components/messages/ProfileChanged"
+        },
+        "profileDetailChanged": {
+          "$ref": "#/components/messages/ProfileDetailChanged"
+        },
+        "doctorDetailChanged": {
+          "$ref": "#/components/messages/DoctorDetailChanged"
+        },
+        "verificationDocumentChanged": {
+          "$ref": "#/components/messages/VerificationDocumentChanged"
+        },
+        "availabilityChanged": {
+          "$ref": "#/components/messages/AvailabilityChanged"
+        },
+        "appointmentChanged": {
+          "$ref": "#/components/messages/AppointmentChanged"
+        },
+        "deviceChanged": {
+          "$ref": "#/components/messages/DeviceChanged"
+        },
+        "vitalReadingChanged": {
+          "$ref": "#/components/messages/VitalReadingChanged"
+        },
+        "healthAlertStateChanged": {
+          "$ref": "#/components/messages/HealthAlertStateChanged"
+        },
+        "appointmentStatusChanged": {
+          "$ref": "#/components/messages/AppointmentStatusChanged"
+        },
+        "messageCreated": {
+          "$ref": "#/components/messages/MessageCreated"
+        },
+        "receiptUpdated": {
+          "$ref": "#/components/messages/ReceiptUpdated"
+        },
+        "vitalReadingRecorded": {
+          "$ref": "#/components/messages/VitalReadingRecorded"
+        },
+        "healthAlertChanged": {
+          "$ref": "#/components/messages/HealthAlertChanged"
+        },
+        "aiReviewChanged": {
+          "$ref": "#/components/messages/AiReviewChanged"
+        },
+        "consentChanged": {
+          "$ref": "#/components/messages/ConsentChanged"
+        },
+        "careAssignmentChanged": {
+          "$ref": "#/components/messages/CareAssignmentChanged"
+        },
+        "doctorReviewChanged": {
+          "$ref": "#/components/messages/DoctorReviewChanged"
+        },
+        "fileScanRequested": {
+          "$ref": "#/components/messages/FileScanRequested"
+        },
+        "fileScanCompleted": {
+          "$ref": "#/components/messages/FileScanCompleted"
+        },
+        "appointmentPaymentRequested": {
+          "$ref": "#/components/messages/AppointmentPaymentRequested"
+        },
+        "consultationChanged": {
+          "$ref": "#/components/messages/ConsultationChanged"
+        },
+        "prescriptionChanged": {
+          "$ref": "#/components/messages/PrescriptionChanged"
+        },
+        "prescriptionPdfRequested": {
+          "$ref": "#/components/messages/PrescriptionPdfRequested"
+        },
+        "pharmacyPrescriptionIntake": {
+          "$ref": "#/components/messages/PharmacyPrescriptionIntake"
+        },
+        "notificationPushRequested": {
+          "$ref": "#/components/messages/NotificationPushRequested"
+        },
+        "notificationEmailRequested": {
+          "$ref": "#/components/messages/NotificationEmailRequested"
+        },
+        "aiGenerationRequested": {
+          "$ref": "#/components/messages/AiGenerationRequested"
+        },
+        "aiArtifactChanged": {
+          "$ref": "#/components/messages/AiArtifactChanged"
+        },
+        "pharmacyOrderChanged": {
+          "$ref": "#/components/messages/PharmacyOrderChanged"
+        },
+        "dispatchAssignmentChanged": {
+          "$ref": "#/components/messages/DispatchAssignmentChanged"
+        },
+        "dispatchOfferExpired": {
+          "$ref": "#/components/messages/DispatchOfferExpired"
+        }
+      }
+    }
+  },
+  "operations": {
+    "receiveSocketCommands": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/socketioApp"
+      },
+      "summary": "API receives policy-checked room subscription and resume commands",
+      "messages": [
+        {
+          "$ref": "#/channels/socketioApp/messages/roomSubscribe"
+        },
+        {
+          "$ref": "#/channels/socketioApp/messages/syncRequest"
+        }
+      ]
+    },
+    "sendSocketEvents": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/socketioApp"
+      },
+      "summary": "API sends authorized room events; no PHI is broadcast to unscoped rooms",
+      "messages": [
+        {
+          "$ref": "#/channels/socketioApp/messages/syncRequired"
+        },
+        {
+          "$ref": "#/channels/socketioApp/messages/socketError"
+        },
+        {
+          "$ref": "#/channels/socketioApp/messages/sessionRevoked"
+        },
+        {
+          "$ref": "#/channels/socketioApp/messages/membershipChanged"
+        },
+        {
+          "$ref": "#/channels/socketioApp/messages/appointmentStatusChanged"
+        },
+        {
+          "$ref": "#/channels/socketioApp/messages/messageCreated"
+        },
+        {
+          "$ref": "#/channels/socketioApp/messages/receiptUpdated"
+        },
+        {
+          "$ref": "#/channels/socketioApp/messages/vitalReadingRecorded"
+        },
+        {
+          "$ref": "#/channels/socketioApp/messages/healthAlertChanged"
+        },
+        {
+          "$ref": "#/channels/socketioApp/messages/aiReviewChanged"
+        },
+        {
+          "$ref": "#/channels/socketioApp/messages/consultationChanged"
+        },
+        {
+          "$ref": "#/channels/socketioApp/messages/prescriptionChanged"
+        },
+        {
+          "$ref": "#/channels/socketioApp/messages/aiArtifactChanged"
+        }
+      ]
+    },
+    "receiveChatCommands": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/socketioChat"
+      },
+      "summary": "API receives authenticated join, leave, and typing commands. Authorization is enforced by a database read against conversation_participants; a non-participant is refused and never added to the room. The sender identity is taken from the authenticated socket, never from the payload.",
+      "messages": [
+        {
+          "$ref": "#/channels/socketioChat/messages/chatJoin"
+        },
+        {
+          "$ref": "#/channels/socketioChat/messages/chatLeave"
+        },
+        {
+          "$ref": "#/channels/socketioChat/messages/chatTyping"
+        },
+        {
+          "$ref": "#/channels/socketioChat/messages/chatStopTyping"
+        }
+      ]
+    },
+    "sendChatEvents": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/socketioChat"
+      },
+      "summary": "API pushes authorized room events to conversation participants. No message text or clinical data is broadcast; clients refetch under policy for content.",
+      "messages": [
+        {
+          "$ref": "#/channels/socketioChat/messages/chatMessageCreated"
+        },
+        {
+          "$ref": "#/channels/socketioChat/messages/chatReceiptUpdated"
+        },
+        {
+          "$ref": "#/channels/socketioChat/messages/chatPresence"
+        }
+      ]
+    },
+    "publishChatFanOut": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/chatEvents"
+      },
+      "summary": "Worker publishes minimum-necessary chat event projections to Redis after processing a conversation.message-created.v1 or conversation.receipt-updated.v1 outbox row. Every gateway instance receives the pub/sub message and fans out to the matching conversation room.",
+      "messages": [
+        {
+          "$ref": "#/channels/chatEvents/messages/messageCreated"
+        },
+        {
+          "$ref": "#/channels/chatEvents/messages/receiptUpdated"
+        }
+      ]
+    },
+    "receiveDeviceVitals": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/mqttVitals"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/mqttVitals/messages/deviceVitals"
+        }
+      ]
+    },
+    "receiveDeviceStatus": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/mqttStatus"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/mqttStatus/messages/deviceStatus"
+        }
+      ]
+    },
+    "sendDeviceCommands": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/mqttCommands"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/mqttCommands/messages/deviceCommand"
+        }
+      ]
+    },
+    "receiveDeviceCommandAcks": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/mqttCommandAcks"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/mqttCommandAcks/messages/deviceCommandAck"
+        }
+      ]
+    },
+    "sendDeviceOta": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/mqttOta"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/mqttOta/messages/deviceOta"
+        }
+      ]
+    },
+    "processOutbox": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/postgresOutboxEvents"
+      },
+      "summary": "Worker claims persisted events, executes side effects and marks processed/retry/dead-letter",
+      "messages": [
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/sessionRevoked"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/membershipChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/profileChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/profileDetailChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/doctorDetailChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/verificationDocumentChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/availabilityChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/appointmentChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/deviceChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/vitalReadingChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/healthAlertStateChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/appointmentStatusChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/messageCreated"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/receiptUpdated"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/vitalReadingRecorded"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/healthAlertChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/aiReviewChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/consentChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/careAssignmentChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/doctorReviewChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/fileScanRequested"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/fileScanCompleted"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/appointmentPaymentRequested"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/consultationChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/prescriptionChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/prescriptionPdfRequested"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/pharmacyPrescriptionIntake"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/notificationPushRequested"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/aiGenerationRequested"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/aiArtifactChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/pharmacyOrderChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/dispatchAssignmentChanged"
+        },
+        {
+          "$ref": "#/channels/postgresOutboxEvents/messages/dispatchOfferExpired"
+        }
+      ]
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "smartCuraSessionCookie": {
+        "type": "httpApiKey",
+        "in": "cookie",
+        "name": "__Host-smartcura_session",
+        "description": "Opaque SmartCura app-session token"
+      },
+      "deviceCredential": {
+        "type": "userPassword",
+        "description": "Unique broker credential bound to one provisioned device and ACL"
+      }
+    },
+    "parameters": {
+      "deviceId": {
+        "description": "Provisioned server UUIDv7; broker ACL and credential identity must match the topic",
+        "location": "$message.payload#/device_id"
+      }
+    },
+    "messages": {
+      "RoomSubscribe": {
+        "name": "room.subscribe.v1",
+        "title": "Subscribe to an authorized resource room",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/RoomSubscribeCommand"
+        }
+      },
+      "SyncRequest": {
+        "name": "sync.request.v1",
+        "title": "Request reconnect guidance from persistent stream cursors",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/SyncRequestCommand"
+        }
+      },
+      "SyncRequired": {
+        "name": "sync.required.v1",
+        "title": "Client must catch up using authoritative REST cursors",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/SyncRequiredEvent"
+        }
+      },
+      "SocketError": {
+        "name": "socket.error.v1",
+        "title": "Stable Socket.IO command error",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/SocketErrorEvent"
+        }
+      },
+      "SessionRevoked": {
+        "name": "session.revoked.v1",
+        "title": "App session revoked",
+        "contentType": "application/json",
+        "x-room": "user:{profile_id}",
+        "payload": {
+          "$ref": "#/components/schemas/SessionRevokedEvent"
+        }
+      },
+      "MembershipChanged": {
+        "name": "membership.changed.v1",
+        "title": "Membership status or effective permissions changed",
+        "contentType": "application/json",
+        "x-room": "user:{profile_id}",
+        "payload": {
+          "$ref": "#/components/schemas/MembershipChangedEvent"
+        }
+      },
+      "ProfileChanged": {
+        "name": "profile.changed.v1",
+        "title": "Profile status or attributes changed",
+        "contentType": "application/json",
+        "x-room": "user:{profile_id}",
+        "payload": {
+          "$ref": "#/components/schemas/ProfileChangedEvent"
+        }
+      },
+      "DeviceChanged": {
+        "name": "device.changed.v1",
+        "title": "Device registered, state changed, assigned or released",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/DeviceChangedEvent"
+        }
+      },
+      "VitalReadingChanged": {
+        "name": "vital_reading.changed.v1",
+        "title": "Vital reading accepted",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/VitalReadingChangedEvent"
+        }
+      },
+      "HealthAlertStateChanged": {
+        "name": "health_alert.changed.v1",
+        "title": "Health alert opened, acknowledged or resolved",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/HealthAlertStateChangedEvent"
+        }
+      },
+      "ProfileDetailChanged": {
+        "name": "profile_detail.changed.v1",
+        "title": "Extended patient profile detail changed",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/ProfileDetailChangedEvent"
+        }
+      },
+      "DoctorDetailChanged": {
+        "name": "doctor_detail.changed.v1",
+        "title": "Doctor professional detail changed",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/DoctorDetailChangedEvent"
+        }
+      },
+      "VerificationDocumentChanged": {
+        "name": "verification.document.changed.v1",
+        "title": "Verification document submitted or reviewed",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/VerificationDocumentChangedEvent"
+        }
+      },
+      "AvailabilityChanged": {
+        "name": "availability.changed.v1",
+        "title": "Doctor availability rules, exception or slots changed",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/AvailabilityChangedEvent"
+        }
+      },
+      "AppointmentChanged": {
+        "name": "appointment.changed.v1",
+        "title": "Appointment booked, rescheduled or status changed",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/AppointmentChangedEvent"
+        }
+      },
+      "AppointmentStatusChanged": {
+        "name": "appointment.status_changed.v1",
+        "title": "Appointment state changed",
+        "contentType": "application/json",
+        "x-room": "appointment:{appointment_id}",
+        "payload": {
+          "$ref": "#/components/schemas/AppointmentStatusChangedEvent"
+        }
+      },
+      "MessageCreated": {
+        "name": "conversation.message-created.v1",
+        "title": "Persistent conversation message created",
+        "contentType": "application/json",
+        "x-room": "conversation:{conversation_id}",
+        "payload": {
+          "$ref": "#/components/schemas/MessageCreatedEvent"
+        }
+      },
+      "ReceiptUpdated": {
+        "name": "conversation.receipt-updated.v1",
+        "title": "Persistent conversation receipt updated",
+        "contentType": "application/json",
+        "x-room": "conversation:{conversation_id}",
+        "payload": {
+          "$ref": "#/components/schemas/ReceiptUpdatedEvent"
+        }
+      },
+      "VitalReadingRecorded": {
+        "name": "iot.reading_recorded.v1",
+        "title": "Validated scalar reading recorded",
+        "contentType": "application/json",
+        "x-room": "patient:{patient_id}",
+        "payload": {
+          "$ref": "#/components/schemas/VitalReadingRecordedEvent"
+        }
+      },
+      "HealthAlertChanged": {
+        "name": "health.alert_changed.v1",
+        "title": "Health alert state changed",
+        "contentType": "application/json",
+        "x-room": "patient:{patient_id}",
+        "payload": {
+          "$ref": "#/components/schemas/HealthAlertChangedEvent"
+        }
+      },
+      "AiReviewChanged": {
+        "name": "ai.artifact_review_changed.v1",
+        "title": "AI clinical-support artifact review changed",
+        "contentType": "application/json",
+        "x-room": "patient:{patient_id}",
+        "payload": {
+          "$ref": "#/components/schemas/AiReviewChangedEvent"
+        }
+      },
+      "DeviceVitals": {
+        "name": "device.vitals.v1",
+        "title": "QoS 1 device scalar-reading packet",
+        "contentType": "application/json",
+        "x-qos": 1,
+        "x-retain": false,
+        "payload": {
+          "$ref": "#/components/schemas/DeviceVitalsPacket"
+        }
+      },
+      "DeviceStatus": {
+        "name": "device.status.v1",
+        "title": "Retained device status/LWT packet",
+        "contentType": "application/json",
+        "x-qos": 1,
+        "x-retain": true,
+        "payload": {
+          "$ref": "#/components/schemas/DeviceStatusPacket"
+        }
+      },
+      "DeviceCommand": {
+        "name": "device.command.v1",
+        "title": "Server-to-device command",
+        "contentType": "application/json",
+        "x-qos": 1,
+        "x-retain": false,
+        "payload": {
+          "$ref": "#/components/schemas/DeviceCommandPacket"
+        }
+      },
+      "DeviceCommandAck": {
+        "name": "device.command_ack.v1",
+        "title": "Device command acknowledgement",
+        "contentType": "application/json",
+        "x-qos": 1,
+        "x-retain": false,
+        "payload": {
+          "$ref": "#/components/schemas/DeviceCommandAckPacket"
+        }
+      },
+      "DeviceOta": {
+        "name": "device.ota.v1",
+        "title": "Short-lived signed OTA instruction",
+        "contentType": "application/json",
+        "x-qos": 1,
+        "x-retain": false,
+        "payload": {
+          "$ref": "#/components/schemas/DeviceOtaPacket"
+        }
+      },
+      "ConsentChanged": {
+        "name": "consent.changed.v1",
+        "title": "Consent grant created or revoked",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/ConsentChangedEvent"
+        }
+      },
+      "CareAssignmentChanged": {
+        "name": "care_assignment.changed.v1",
+        "title": "Care assignment created or ended",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/CareAssignmentChangedEvent"
+        }
+      },
+      "DoctorReviewChanged": {
+        "name": "doctor_review.changed.v1",
+        "title": "Verified patient doctor review created or updated",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/DoctorReviewChangedEvent"
+        }
+      },
+      "FileScanRequested": {
+        "name": "file.object.scan-requested.v1",
+        "title": "Finalized private object requires malware scanning",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/FileScanRequestedEvent"
+        }
+      },
+      "FileScanCompleted": {
+        "name": "file.object.scan-completed.v1",
+        "title": "Private object reached a terminal malware-scan state",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/FileScanCompletedEvent"
+        }
+      },
+      "AppointmentPaymentRequested": {
+        "name": "appointment.payment-requested.v1",
+        "title": "Pending appointment payment requires provider settlement",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/AppointmentPaymentRequestedEvent"
+        }
+      },
+      "ConsultationChanged": {
+        "name": "consultation.changed.v1",
+        "title": "Consultation state changed",
+        "contentType": "application/json",
+        "x-room": "appointment:{appointment_id}",
+        "payload": {
+          "$ref": "#/components/schemas/ConsultationChangedEvent"
+        }
+      },
+      "PrescriptionChanged": {
+        "name": "prescription.changed.v1",
+        "title": "Prescription state changed",
+        "contentType": "application/json",
+        "x-room": "user:{patient_profile_id}",
+        "payload": {
+          "$ref": "#/components/schemas/PrescriptionChangedEvent"
+        }
+      },
+      "PrescriptionPdfRequested": {
+        "name": "prescription.pdf-requested.v1",
+        "title": "Generate an immutable signed prescription PDF",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/PrescriptionWorkEvent"
+        }
+      },
+      "PharmacyPrescriptionIntake": {
+        "name": "pharmacy.prescription-intake.v1",
+        "title": "Signed prescription available for pharmacy intake",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/PrescriptionWorkEvent"
+        }
+      },
+      "NotificationPushRequested": {
+        "name": "notification.push-requested.v1",
+        "title": "Deliver a minimum-data generic push notification",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/NotificationPushRequestedEvent"
+        }
+      },
+      "NotificationEmailRequested": {
+        "name": "notification.email-requested.v1",
+        "title": "Deliver a minimum-data generic transactional email",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/NotificationEmailRequestedEvent"
+        }
+      },
+      "AiGenerationRequested": {
+        "name": "ai.generation-requested.v1",
+        "title": "Governed AI generation requested",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/AiGenerationRequestedEvent"
+        }
+      },
+      "AiArtifactChanged": {
+        "name": "ai.artifact-changed.v1",
+        "title": "AI artifact created or reviewed",
+        "contentType": "application/json",
+        "x-room": "patient:{patient_id}",
+        "payload": {
+          "$ref": "#/components/schemas/AiArtifactChangedEvent"
+        }
+      },
+      "PharmacyOrderChanged": {
+        "name": "pharmacy.order-changed.v1",
+        "title": "Pharmacy order state changed",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/PharmacyOrderChangedEvent"
+        }
+      },
+      "DispatchAssignmentChanged": {
+        "name": "dispatch.assignment-changed.v1",
+        "title": "Dispatch assignment state changed",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/DispatchAssignmentChangedEvent"
+        }
+      },
+      "DispatchOfferExpired": {
+        "name": "dispatch.offer-expired.v1",
+        "title": "Dispatch offer expired unaccepted",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/DispatchOfferExpiredEvent"
+        }
+      },
+      "ChatJoin": {
+        "name": "chat.join.v1",
+        "title": "Join a conversation room",
+        "contentType": "application/json",
+        "x-room": "conversation:{conversation_id}",
+        "payload": {
+          "$ref": "#/components/schemas/ChatConversationCommand"
+        }
+      },
+      "ChatLeave": {
+        "name": "chat.leave.v1",
+        "title": "Leave a conversation room",
+        "contentType": "application/json",
+        "x-room": "conversation:{conversation_id}",
+        "payload": {
+          "$ref": "#/components/schemas/ChatConversationCommand"
+        }
+      },
+      "ChatTyping": {
+        "name": "chat.typing.v1",
+        "title": "Broadcast a typing indicator to the conversation room except the sender",
+        "contentType": "application/json",
+        "x-room": "conversation:{conversation_id}",
+        "payload": {
+          "$ref": "#/components/schemas/ChatConversationCommand"
+        }
+      },
+      "ChatStopTyping": {
+        "name": "chat.stop_typing.v1",
+        "title": "Broadcast a stop-typing indicator to the conversation room except the sender",
+        "contentType": "application/json",
+        "x-room": "conversation:{conversation_id}",
+        "payload": {
+          "$ref": "#/components/schemas/ChatConversationCommand"
+        }
+      },
+      "ChatPresence": {
+        "name": "chat.presence.v1",
+        "title": "Presence status change for a profile, broadcast to every conversation room the profile is a participant in",
+        "contentType": "application/json",
+        "x-room": "conversation:{conversation_id}",
+        "payload": {
+          "$ref": "#/components/schemas/ChatPresenceEvent"
+        }
+      }
+    },
+    "schemas": {
+      "UuidV7": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      },
+      "Timestamp": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "EventMetadata": {
+        "type": "object",
+        "required": [
+          "event_id",
+          "event_type",
+          "event_version",
+          "aggregate_type",
+          "aggregate_id",
+          "aggregate_version",
+          "organization_id",
+          "occurred_at",
+          "published_at",
+          "actor_profile_id",
+          "correlation_id",
+          "causation_id",
+          "idempotency_key",
+          "partition_key"
+        ],
+        "properties": {
+          "event_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "event_type": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+          },
+          "event_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "aggregate_type": {
+            "type": "string"
+          },
+          "aggregate_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "aggregate_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "organization_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UuidV7"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "site_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UuidV7"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "occurred_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "published_at": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Timestamp"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "actor_profile_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UuidV7"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "correlation_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "causation_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UuidV7"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "idempotency_key": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "partition_key": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "RoomSubscribeCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "request_id",
+          "room_type",
+          "resource_id"
+        ],
+        "properties": {
+          "request_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "room_type": {
+            "type": "string",
+            "enum": [
+              "appointment",
+              "conversation",
+              "patient"
+            ]
+          },
+          "resource_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          }
+        }
+      },
+      "StreamCursor": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stream",
+          "cursor"
+        ],
+        "properties": {
+          "stream": {
+            "type": "string",
+            "enum": [
+              "notifications",
+              "appointments",
+              "conversation_messages",
+              "vital_readings",
+              "health_alerts",
+              "ai_artifacts"
+            ]
+          },
+          "resource_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UuidV7"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 1024
+          }
+        }
+      },
+      "SyncRequestCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "request_id",
+          "streams"
+        ],
+        "properties": {
+          "request_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "streams": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/StreamCursor"
+            }
+          }
+        }
+      },
+      "SyncRequiredEvent": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "request_id",
+          "reason",
+          "rest_paths"
+        ],
+        "properties": {
+          "request_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "reconnected",
+              "cursor_expired",
+              "gap_detected"
+            ]
+          },
+          "rest_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          }
+        }
+      },
+      "SocketErrorEvent": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "request_id",
+          "code",
+          "correlation_id"
+        ],
+        "properties": {
+          "request_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "APP_SESSION_INVALID",
+              "PERMISSION_DENIED",
+              "OBJECT_ACCESS_DENIED",
+              "RESOURCE_NOT_FOUND",
+              "VALIDATION_FAILED",
+              "RATE_LIMITED"
+            ]
+          },
+          "correlation_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          }
+        }
+      },
+      "SessionRevokedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "session_id",
+          "reason"
+        ],
+        "properties": {
+          "session_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "user_logout",
+              "idle_expired",
+              "absolute_expired",
+              "membership_ended",
+              "security_action"
+            ]
+          }
+        }
+      },
+      "SessionRevokedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/SessionRevokedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "MembershipChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "membership_id",
+          "profile_id",
+          "role",
+          "status"
+        ],
+        "properties": {
+          "membership_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "profile_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "patient",
+              "doctor",
+              "driver",
+              "pharmacy",
+              "emergency",
+              "admin",
+              "super_admin"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "applied",
+              "invited",
+              "active",
+              "suspended",
+              "revoked",
+              "expired"
+            ]
+          }
+        }
+      },
+      "MembershipChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/MembershipChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "ProfileChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "profile_id",
+          "status",
+          "onboarding_completed"
+        ],
+        "properties": {
+          "profile_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "active",
+              "suspended",
+              "deactivated"
+            ]
+          },
+          "onboarding_completed": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProfileChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/ProfileChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "DeviceChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Registration, state change, assignment or release of a device. Serial numbers and assignment detail stay in the audit log.",
+        "required": [
+          "device_id",
+          "organization_id",
+          "device_type",
+          "state"
+        ],
+        "properties": {
+          "device_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "organization_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "device_type": {
+            "type": "string",
+            "enum": [
+              "vitals_monitor",
+              "ecg",
+              "thermometer",
+              "pulse_oximeter",
+              "simulator"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "provisioned",
+              "active",
+              "suspended",
+              "retired"
+            ]
+          }
+        }
+      },
+      "DeviceChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/DeviceChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "VitalReadingChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "One accepted vital reading. Carries no measured value or unit: the value is clinical data and an event stream fans out more widely than an authorized read.",
+        "required": [
+          "reading_id",
+          "device_id",
+          "patient_profile_id",
+          "metric",
+          "quality",
+          "recorded_at"
+        ],
+        "properties": {
+          "reading_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "device_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "patient_profile_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "metric": {
+            "type": "string",
+            "enum": [
+              "heart_rate",
+              "oxygen_saturation",
+              "body_temperature",
+              "systolic_bp",
+              "diastolic_bp",
+              "respiratory_rate",
+              "ecg_voltage",
+              "blood_pressure",
+              "blood_glucose",
+              "body_weight"
+            ]
+          },
+          "quality": {
+            "type": "string",
+            "enum": [
+              "valid",
+              "suspect",
+              "invalid",
+              "unknown"
+            ]
+          },
+          "recorded_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        }
+      },
+      "VitalReadingChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/VitalReadingChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "HealthAlertStateChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Payload of the published health_alert.changed.v1 event. Distinct from the older speculative health.alert_changed.v1 message, whose state and metric vocabularies predate the implemented enums. observed_value is excluded because it is clinical data.",
+        "required": [
+          "alert_id",
+          "patient_profile_id",
+          "metric",
+          "severity",
+          "state"
+        ],
+        "properties": {
+          "alert_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "patient_profile_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "metric": {
+            "type": "string",
+            "enum": [
+              "heart_rate",
+              "oxygen_saturation",
+              "body_temperature",
+              "systolic_bp",
+              "diastolic_bp",
+              "respiratory_rate",
+              "ecg_voltage",
+              "blood_pressure",
+              "blood_glucose",
+              "body_weight"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "info",
+              "warning",
+              "critical"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "open",
+              "acknowledged",
+              "escalated",
+              "resolved",
+              "dismissed"
+            ]
+          }
+        }
+      },
+      "HealthAlertStateChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/HealthAlertStateChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "ProfileDetailChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "One extended patient profile detail row changed. Deliberately coarse: it says an address, contact, allergy or condition list changed, never its content.",
+        "required": [
+          "profile_id",
+          "detail_kind",
+          "detail_id",
+          "change"
+        ],
+        "properties": {
+          "profile_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "detail_kind": {
+            "type": "string",
+            "enum": [
+              "address",
+              "emergency_contact",
+              "allergy",
+              "condition"
+            ]
+          },
+          "detail_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "change": {
+            "type": "string",
+            "enum": [
+              "created",
+              "updated",
+              "removed"
+            ]
+          }
+        }
+      },
+      "ProfileDetailChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/ProfileDetailChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "DoctorDetailChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "A doctor membership's professional detail changed. accepts_new_patients is published because a directory cache has to know availability flipped; biography and fee are not.",
+        "required": [
+          "membership_id",
+          "organization_id",
+          "change",
+          "accepts_new_patients"
+        ],
+        "properties": {
+          "membership_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "organization_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "change": {
+            "type": "string",
+            "enum": [
+              "created",
+              "updated"
+            ]
+          },
+          "accepts_new_patients": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DoctorDetailChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/DoctorDetailChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "VerificationDocumentChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "A verification document was requested, submitted or reviewed. Object identity, scan state and derived membership verification status stay in the audit log.",
+        "required": [
+          "document_id",
+          "membership_id",
+          "document_kind",
+          "status"
+        ],
+        "properties": {
+          "document_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "membership_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "document_kind": {
+            "type": "string",
+            "enum": [
+              "medical_license",
+              "national_id",
+              "driving_licence",
+              "vehicle_registration",
+              "pharmacy_licence",
+              "qualification_certificate",
+              "professional_indemnity"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_submitted",
+              "pending_review",
+              "changes_requested",
+              "approved",
+              "rejected",
+              "suspended",
+              "expired"
+            ]
+          }
+        }
+      },
+      "VerificationDocumentChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/VerificationDocumentChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "AvailabilityChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "A doctor's availability rules, exceptions or generated slots changed. slot_count is the number of slots the mutation affected; times and reasons stay in the audit log.",
+        "required": [
+          "membership_id",
+          "organization_id",
+          "change",
+          "slot_count"
+        ],
+        "properties": {
+          "membership_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "organization_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "change": {
+            "type": "string",
+            "enum": [
+              "rules_replaced",
+              "exception_recorded",
+              "slots_generated"
+            ]
+          },
+          "slot_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "AvailabilityChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/AvailabilityChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "AppointmentChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Minimum-necessary appointment lifecycle projection. No time, fee, payment amount or clinical detail is published; consumers refetch under policy.",
+        "required": [
+          "appointment_id",
+          "patient_profile_id",
+          "doctor_membership_id",
+          "previous_status",
+          "status",
+          "reason_code"
+        ],
+        "properties": {
+          "appointment_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "patient_profile_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "doctor_membership_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "previous_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "pending_payment",
+              "confirmed",
+              "checked_in",
+              "in_progress",
+              "cancelled",
+              "completed",
+              "no_show",
+              "rescheduled",
+              null
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_payment",
+              "confirmed",
+              "checked_in",
+              "in_progress",
+              "cancelled",
+              "completed",
+              "no_show",
+              "rescheduled"
+            ]
+          },
+          "reason_code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[a-z][a-z0-9_]{1,62}$"
+          }
+        }
+      },
+      "AppointmentChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/AppointmentChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "AppointmentStatusChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "appointment_id",
+          "previous_status",
+          "status",
+          "reason"
+        ],
+        "properties": {
+          "appointment_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "previous_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "pending_payment",
+              "confirmed",
+              "checked_in",
+              "in_progress",
+              "completed",
+              "cancelled",
+              "no_show",
+              null
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_payment",
+              "confirmed",
+              "checked_in",
+              "in_progress",
+              "completed",
+              "cancelled",
+              "no_show"
+            ]
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "AppointmentStatusChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/AppointmentStatusChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "MessageCreatedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "conversation_id",
+          "message_id",
+          "sender_profile_id",
+          "sequence_no",
+          "message_type"
+        ],
+        "properties": {
+          "conversation_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "message_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "sender_profile_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "sequence_no": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "message_type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "file",
+              "system"
+            ]
+          }
+        }
+      },
+      "MessageCreatedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/MessageCreatedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "ReceiptUpdatedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "conversation_id",
+          "profile_id",
+          "through_sequence_no"
+        ],
+        "properties": {
+          "conversation_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "profile_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "through_sequence_no": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "ReceiptUpdatedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/ReceiptUpdatedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "VitalReadingRecordedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reading_id",
+          "patient_id",
+          "device_id",
+          "metric",
+          "value_primary",
+          "value_secondary",
+          "unit",
+          "quality",
+          "recorded_at"
+        ],
+        "properties": {
+          "reading_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "patient_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "device_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "metric": {
+            "type": "string",
+            "enum": [
+              "heart_rate",
+              "oxygen_saturation",
+              "body_temperature",
+              "systolic_bp",
+              "diastolic_bp",
+              "respiratory_rate",
+              "ecg_voltage",
+              "blood_pressure",
+              "blood_glucose",
+              "body_weight"
+            ]
+          },
+          "value_primary": {
+            "type": "number"
+          },
+          "value_secondary": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "/min",
+              "%",
+              "Cel",
+              "mV",
+              "mm[Hg]",
+              "mg/dL",
+              "kg"
+            ]
+          },
+          "quality": {
+            "type": "string",
+            "enum": [
+              "valid",
+              "suspect",
+              "invalid",
+              "unknown"
+            ]
+          },
+          "recorded_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        }
+      },
+      "VitalReadingRecordedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/VitalReadingRecordedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "HealthAlertChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "alert_id",
+          "patient_id",
+          "metric",
+          "severity",
+          "previous_status",
+          "status",
+          "occurred_at"
+        ],
+        "properties": {
+          "alert_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "patient_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "metric": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "info",
+              "warning",
+              "critical"
+            ]
+          },
+          "previous_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "open",
+              "acknowledged",
+              "escalated",
+              "resolved",
+              "dismissed",
+              null
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "acknowledged",
+              "escalated",
+              "resolved",
+              "dismissed"
+            ]
+          },
+          "occurred_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        }
+      },
+      "HealthAlertChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/HealthAlertChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "AiReviewChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "artifact_id",
+          "patient_id",
+          "artifact_type",
+          "previous_status",
+          "status",
+          "reviewer_profile_id"
+        ],
+        "properties": {
+          "artifact_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "patient_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "artifact_type": {
+            "type": "string",
+            "enum": [
+              "symptom_summary",
+              "care_navigation",
+              "health_summary",
+              "risk_flag",
+              "forecast",
+              "anomaly"
+            ]
+          },
+          "previous_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "pending_review",
+              "approved",
+              "rejected",
+              "superseded",
+              null
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_review",
+              "approved",
+              "rejected",
+              "superseded"
+            ]
+          },
+          "reviewer_profile_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UuidV7"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "AiReviewChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/AiReviewChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "VitalMetric": {
+        "type": "string",
+        "description": "Scalar readings only. ecg_voltage is a bounded spot/summary value; ECG waveform samples use the later object-storage upload flow and never this packet.",
+        "enum": [
+          "heart_rate",
+          "oxygen_saturation",
+          "body_temperature",
+          "systolic_bp",
+          "diastolic_bp",
+          "respiratory_rate",
+          "ecg_voltage",
+          "blood_pressure",
+          "blood_glucose",
+          "body_weight"
+        ]
+      },
+      "ReadingQuality": {
+        "type": "string",
+        "enum": [
+          "valid",
+          "suspect",
+          "invalid",
+          "unknown"
+        ]
+      },
+      "DeviceMetricSample": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "metric",
+          "value_primary",
+          "unit",
+          "quality"
+        ],
+        "properties": {
+          "metric": {
+            "$ref": "#/components/schemas/VitalMetric"
+          },
+          "value_primary": {
+            "type": "number"
+          },
+          "value_secondary": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "/min",
+              "%",
+              "Cel",
+              "mV",
+              "mm[Hg]",
+              "mg/dL",
+              "kg"
+            ]
+          },
+          "quality": {
+            "$ref": "#/components/schemas/ReadingQuality"
+          }
+        }
+      },
+      "DeviceVitalsPacket": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "device_id",
+          "boot_id",
+          "sequence_no",
+          "recorded_at",
+          "metrics"
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "device_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "boot_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sequence_no": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "recorded_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "metrics": {
+            "type": "array",
+            "description": "One scalar sample per metric for this device boot/sequence. Duplicate metric names are rejected; waveform samples are excluded.",
+            "minItems": 1,
+            "maxItems": 16,
+            "uniqueItems": true,
+            "x-unique-by": "metric",
+            "items": {
+              "$ref": "#/components/schemas/DeviceMetricSample"
+            }
+          }
+        }
+      },
+      "DeviceStatusPacket": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "device_id",
+          "boot_id",
+          "status",
+          "reported_at",
+          "firmware_version"
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "device_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "boot_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "online",
+              "offline"
+            ]
+          },
+          "reported_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "firmware_version": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "battery_percent": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 100
+          },
+          "rssi_dbm": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": -150,
+            "maximum": 0
+          },
+          "diagnostic_code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 64
+          }
+        }
+      },
+      "DeviceCommandPacket": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "command_id",
+          "device_id",
+          "command_type",
+          "issued_at",
+          "expires_at",
+          "parameters"
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "command_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "device_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "command_type": {
+            "type": "string",
+            "enum": [
+              "calibrate",
+              "sync_now",
+              "reboot",
+              "set_sampling"
+            ]
+          },
+          "issued_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "expires_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "DeviceCommandAckPacket": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "command_id",
+          "device_id",
+          "boot_id",
+          "status",
+          "acknowledged_at"
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "command_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "device_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "boot_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "completed",
+              "failed",
+              "expired"
+            ]
+          },
+          "acknowledged_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "error_code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 64
+          }
+        }
+      },
+      "DeviceOtaPacket": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "command_id",
+          "device_id",
+          "firmware_id",
+          "version",
+          "download_url",
+          "sha256",
+          "expires_at"
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "command_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "device_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "firmware_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "download_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "expires_at": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        }
+      },
+      "ConsentChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "consent_id",
+          "grantor_profile_id",
+          "scope",
+          "status"
+        ],
+        "properties": {
+          "consent_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "grantor_profile_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "profile_contact",
+              "clinical_record",
+              "medication",
+              "iot_reading",
+              "ai_artifact",
+              "full_record"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "revoked",
+              "expired"
+            ]
+          }
+        }
+      },
+      "ConsentChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/ConsentChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "CareAssignmentChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "assignment_id",
+          "patient_profile_id",
+          "clinician_membership_id",
+          "status"
+        ],
+        "properties": {
+          "assignment_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "patient_profile_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "clinician_membership_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "completed",
+              "revoked",
+              "expired"
+            ]
+          }
+        }
+      },
+      "CareAssignmentChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/CareAssignmentChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "DoctorReviewChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Minimum-necessary review projection. Comment, tags, appointment and patient identity are deliberately excluded.",
+        "required": [
+          "review_id",
+          "doctor_membership_id",
+          "rating",
+          "change"
+        ],
+        "properties": {
+          "review_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "doctor_membership_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "change": {
+            "type": "string",
+            "enum": [
+              "created",
+              "updated"
+            ]
+          }
+        }
+      },
+      "DoctorReviewChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/DoctorReviewChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "FileScanRequestedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Minimum-data scan command. The worker resolves the object key, content metadata and checksum from PostgreSQL rather than publishing them.",
+        "required": [
+          "object_id"
+        ],
+        "properties": {
+          "object_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          }
+        }
+      },
+      "FileScanRequestedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/FileScanRequestedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "FileScanCompletedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Terminal scan projection. Object keys, checksums, scanner signatures and owner identity remain in the database/audit boundary.",
+        "required": [
+          "object_id",
+          "scan_state",
+          "downloadable"
+        ],
+        "properties": {
+          "object_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "scan_state": {
+            "type": "string",
+            "enum": [
+              "clean",
+              "infected",
+              "scan_failed"
+            ]
+          },
+          "downloadable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FileScanCompletedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/FileScanCompletedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "AppointmentPaymentRequestedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Minimum-data payment command. Amount, patient, appointment and provider reference are resolved from PostgreSQL by the worker.",
+        "required": [
+          "payment_id"
+        ],
+        "properties": {
+          "payment_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          }
+        }
+      },
+      "AppointmentPaymentRequestedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/AppointmentPaymentRequestedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "ConsultationChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "consultation_id",
+          "appointment_id",
+          "previous_status",
+          "status"
+        ],
+        "properties": {
+          "consultation_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "appointment_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "previous_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "not_started",
+              "ready",
+              "in_progress",
+              "completed",
+              "cancelled",
+              null
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_started",
+              "ready",
+              "in_progress",
+              "completed",
+              "cancelled"
+            ]
+          }
+        }
+      },
+      "ConsultationChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/ConsultationChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "PrescriptionChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "prescription_id",
+          "patient_profile_id",
+          "previous_status",
+          "status"
+        ],
+        "properties": {
+          "prescription_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "patient_profile_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "previous_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "draft",
+              "signed",
+              "superseded",
+              "cancelled",
+              "expired",
+              "discarded",
+              null
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "signed",
+              "superseded",
+              "cancelled",
+              "expired",
+              "discarded"
+            ]
+          }
+        }
+      },
+      "PrescriptionChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/PrescriptionChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "PrescriptionWorkData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "prescription_id"
+        ],
+        "properties": {
+          "prescription_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          }
+        }
+      },
+      "PrescriptionWorkEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/PrescriptionWorkData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "NotificationPushRequestedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "delivery_id"
+        ],
+        "properties": {
+          "delivery_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          }
+        }
+      },
+      "NotificationPushRequestedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/NotificationPushRequestedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "NotificationEmailRequestedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "delivery_id"
+        ],
+        "properties": {
+          "delivery_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          }
+        }
+      },
+      "NotificationEmailRequestedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/NotificationEmailRequestedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "AiGenerationRequestedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "generation_id"
+        ],
+        "properties": {
+          "generation_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          }
+        }
+      },
+      "AiGenerationRequestedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/AiGenerationRequestedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "AiArtifactChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Minimum data only: no content, summary text, risk detail or confidence. A subscriber refetches through an authorized read.",
+        "required": [
+          "artifact_id",
+          "patient_profile_id",
+          "artifact_type",
+          "previous_review_status",
+          "review_status"
+        ],
+        "properties": {
+          "artifact_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "patient_profile_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "artifact_type": {
+            "type": "string",
+            "enum": [
+              "symptom_summary",
+              "care_navigation",
+              "health_summary",
+              "risk_flag",
+              "forecast",
+              "anomaly"
+            ]
+          },
+          "previous_review_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "pending_review",
+              "approved",
+              "rejected",
+              "superseded",
+              null
+            ]
+          },
+          "review_status": {
+            "type": "string",
+            "enum": [
+              "pending_review",
+              "approved",
+              "rejected",
+              "superseded"
+            ]
+          }
+        }
+      },
+      "AiArtifactChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/AiArtifactChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "PharmacyOrderChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Minimum data only: no patient identity, medication, quantity or batch. A subscriber refetches through an authorized site-scoped read.",
+        "required": [
+          "pharmacy_order_id",
+          "previous_status",
+          "status",
+          "reason_code"
+        ],
+        "properties": {
+          "pharmacy_order_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "previous_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "received",
+              "awaiting_validation",
+              "validated",
+              "stock_reserved",
+              "fulfilling",
+              "ready_for_dispatch",
+              "dispatched",
+              "delivered",
+              "delivery_exception",
+              "returned",
+              "rejected",
+              "cancelled",
+              null
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "received",
+              "awaiting_validation",
+              "validated",
+              "stock_reserved",
+              "fulfilling",
+              "ready_for_dispatch",
+              "dispatched",
+              "delivered",
+              "delivery_exception",
+              "returned",
+              "rejected",
+              "cancelled"
+            ]
+          },
+          "reason_code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[a-z][a-z0-9_]{1,62}$"
+          }
+        }
+      },
+      "PharmacyOrderChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/PharmacyOrderChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "DispatchAssignmentChangedData": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Minimum data only: no recipient identity, address or coordinates. A driver client refetches recipient details through the assigned-only disclosure route.",
+        "required": [
+          "assignment_id",
+          "dispatch_job_id",
+          "previous_status",
+          "status"
+        ],
+        "properties": {
+          "assignment_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "dispatch_job_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "previous_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "assigned",
+              "en_route_pickup",
+              "arrived_pickup",
+              "picked_up",
+              "en_route_dropoff",
+              "arrived_dropoff",
+              "completed",
+              "cancelled",
+              "failed",
+              null
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "assigned",
+              "en_route_pickup",
+              "arrived_pickup",
+              "picked_up",
+              "en_route_dropoff",
+              "arrived_dropoff",
+              "completed",
+              "cancelled",
+              "failed"
+            ]
+          }
+        }
+      },
+      "DispatchAssignmentChangedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/DispatchAssignmentChangedData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "DispatchOfferExpiredData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "offer_id",
+          "dispatch_job_id"
+        ],
+        "properties": {
+          "offer_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "dispatch_job_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          }
+        }
+      },
+      "DispatchOfferExpiredEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "payload"
+            ],
+            "properties": {
+              "payload": {
+                "$ref": "#/components/schemas/DispatchOfferExpiredData"
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "ChatConversationCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Client command to join, leave, or broadcast a typing indicator for a conversation. The sender identity is taken from the authenticated socket, never from the payload. Authorization to join is enforced by a database read against conversation_participants.",
+        "required": [
+          "conversation_id"
+        ],
+        "properties": {
+          "conversation_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          }
+        }
+      },
+      "ChatPresenceEvent": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Presence status change for a profile. Broadcast to every conversation room the profile is an active participant in. The room list is read from the database so the broadcast never reaches a room the profile left. A 45-second offline grace period absorbs brief reconnects without flapping presence.",
+        "required": [
+          "profile_id",
+          "status"
+        ],
+        "properties": {
+          "profile_id": {
+            "$ref": "#/components/schemas/UuidV7"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "online",
+              "away",
+              "offline"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

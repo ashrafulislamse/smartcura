@@ -1,0 +1,14 @@
+-- DEPRECATED -- use tools/seed-driver-screenshots.sql instead.
+--
+-- The previous version of this file hard-coded Rajesh's driver_id and an
+-- arbitrary assignment_id that did not match the live database, so the
+-- `ON CONFLICT DO NOTHING` calls silently never matched and the earnings
+-- table accumulated orphan rows pointing at a non-existent driver.
+--
+-- Section 4 of `tools/seed-driver-screenshots.sql` now performs the
+-- equivalent work correctly: it resolves the driver and a real completed
+-- assignment dynamically and inserts earnings events that the existing
+-- unique partial indexes will accept.
+--
+-- This file is kept as a tombstone so existing runbook references still
+-- resolve. Do not run it.

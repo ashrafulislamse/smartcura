@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none" role="img" aria-label="SmartCura Driver app icon">
+  <title>SmartCura Driver — app icon</title>
+  <!--
+    Driver app: medical location pin over a dotted response route on the emergency red tile.
+    Meaning: urgent medical transport, dispatched and tracked end-to-end — the amber
+    origin dot, the route, and the pin-as-destination. Cross is cut through the pin
+    (even-odd) so the tile color forms a classic medical cross.
+    Platform primary: #DC2626.
+  -->
+  <defs>
+    <linearGradient id="dvbg" x1="140" y1="60" x2="900" y2="1010" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EF4444"/>
+      <stop offset="0.55" stop-color="#DC2626"/>
+      <stop offset="1" stop-color="#991B1B"/>
+    </linearGradient>
+    <radialGradient id="dvglow" cx="330" cy="240" r="640" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#dvbg)"/>
+  <rect width="1024" height="1024" fill="url(#dvglow)"/>
+  <!-- response route: dotted, from origin toward the pin -->
+  <path d="M168 852 C340 916 520 760 700 820 C764 842 818 812 852 764" stroke="#FFFFFF" stroke-opacity="0.9" stroke-width="34" stroke-linecap="round" stroke-dasharray="0.1 62" fill="none"/>
+  <!-- origin marker -->
+  <circle cx="168" cy="852" r="28" fill="#FBBF24"/>
+  <circle cx="168" cy="852" r="28" fill="none" stroke="#FFFFFF" stroke-opacity="0.9" stroke-width="10"/>
+  <!-- medical pin: white teardrop with the tile showing through as a cross -->
+  <path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" d="M512 780 C480 700 312 580 312 420 A200 200 0 1 1 712 420 C712 580 544 700 512 780 Z M478 310 H546 V386 H622 V454 H546 V530 H478 V454 H402 V386 H478 Z"/>
+</svg>

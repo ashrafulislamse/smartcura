@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" role="img" aria-label="No emergency contacts">
+  <title>No emergency contacts illustration</title>
+  <!-- Contact card -->
+  <rect x="28" y="28" width="64" height="48" rx="8" stroke="#2563EB" stroke-width="3"/>
+  <!-- Person icon -->
+  <circle cx="50" cy="48" r="7" fill="#94A3B8"/>
+  <path d="M38 70c0-8 6-14 12-14s12 6 12 14" stroke="#94A3B8" stroke-width="3" stroke-linecap="round"/>
+  <!-- Emergency cross -->
+  <rect x="70" y="52" width="6" height="16" rx="1" fill="#EF4444"/>
+  <rect x="65" y="57" width="16" height="6" rx="1" fill="#EF4444"/>
+  <!-- ECG pulse line -->
+  <path d="M16 100h16l8-8 8 12 8-10 8 6 8-8 8 10 8-8 8 6h16" stroke="#06B6D4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

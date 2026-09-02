@@ -1,0 +1,174 @@
+<mxfile host="app.diagrams.net" modified="2026-08-12T14:50:00.000Z" agent="SmartCura" version="24.7.17" type="device">
+  <diagram name="Breadboard" id="smartcura-vitals-breadboard">
+    <mxGraphModel dx="1800" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="SmartCura vitals monitor &#8212; breadboard wiring&#10;ESP32 + MAX30102 (SpO2/HR) + DS18B20 (temp) + 0.91&quot; OLED &#8212; ONE STEP AT A TIME" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1620" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="step1" value="STEP 1&#10;Power rails&#10;(red +3.3V, blue GND)&#10;Verify: voltmeter reads +3.3V on red rail" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;align=center;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="90" width="320" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="step2" value="STEP 2&#10;OLED (0.91&quot;) on I2C&#10;SDA=GPIO21, SCL=GPIO22&#10;Verify: serial says &#8220;[OK] OLED detected&#8221;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;align=center;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="380" y="90" width="320" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="step3" value="STEP 3&#10;MAX30102 on I2C (shared bus)&#10;SDA=GPIO21, SCL=GPIO22&#10;Verify: serial says &#8220;[OK] MAX30102 found&#8221;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;align=center;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="720" y="90" width="320" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="step4" value="STEP 4&#10;DS18B20 on GPIO5&#10;DATA needs 4.7k pull-up to +3.3V&#10;Verify: serial says &#8220;[OK] DS18B20 found&#8221;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;align=center;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1060" y="90" width="320" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="step5" value="STEP 5&#10;Mount the ESP32 across the center gap, pins facing inward." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9e6;strokeColor=#d6b656;dashed=1;align=center;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1400" y="90" width="260" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="bb" value="" style="shape=mxgraph.cabinets.breadboard;html=1;whiteSpace=wrap;fillColor=#FAFAFA;strokeColor=#444444;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="200" width="1620" height="780" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rail_pos" value="+3.3V rail (RED)&#10;long red strip along TOP of breadboard" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#b85450;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="220" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="rail_neg" value="GND rail (BLUE)&#10;long blue strip along BOTTOM of breadboard" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="920" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="esp32" value="ESP32 devkit&#10;v1 / v2 / v3 (30-pin)&#10;&#10;Pin 3V3 &#8594; red rail&#10;Pin GND &#8594; blue rail&#10;GPIO21 (SDA) &#8594; I2C bus&#10;GPIO22 (SCL) &#8594; I2C bus&#10;GPIO5 (DATA) &#8594; DS18B20" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="700" y="540" width="300" height="200" as="geometry" />
+        </mxCell>
+
+        <mxCell id="esp32_3v3" value="3V3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#b85450;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="720" y="500" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="esp32_gnd" value="GND" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="780" y="500" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="esp21" value="GPIO21&#10;SDA" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="840" y="500" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="esp22" value="GPIO22&#10;SCL" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="910" y="500" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="esp4" value="GPIO5&#10;1-Wire DATA" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#d79b00;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="980" y="500" width="80" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="i2cbus" value="I2C bus (shared)&#10;SDA &#8594; GPIO21&#10;SCL &#8594; GPIO22" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673a6;strokeWidth=2;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="760" y="320" width="180" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="oled" value="0.91&quot; OLED&#10;SSD1306, 128x32&#10;I2C addr 0x3C" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="220" y="400" width="180" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="oled_vcc" value="VCC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#b85450;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="225" y="355" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="oled_gnd" value="GND" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="285" y="355" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="oled_sda" value="SDA" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="225" y="430" width="50" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="oled_scl" value="SCL" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="285" y="430" width="50" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="max" value="MAX30102&#10;SpO2 + heart rate&#10;I2C addr 0x57&#10;3.3V ONLY &#8212; NOT 5V" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fad7ac;strokeColor=#b46504;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="400" width="180" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="max_vcc" value="VIN" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#b85450;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1305" y="355" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="max_gnd" value="GND" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1365" y="355" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="max_sda" value="SDA" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1305" y="430" width="50" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="max_scl" value="SCL" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1365" y="430" width="50" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ds" value="DS18B20&#10;temperature probe&#10;TO-92 package" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="700" y="780" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="ds_red" value="RED&#10;VCC (+3.3V)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#b85450;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="750" width="80" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ds_yel" value="YELLOW&#10;DATA" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#d79b00;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="790" y="750" width="80" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ds_blk" value="BLACK&#10;GND" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="880" y="750" width="60" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r_pullup" value="4.7k&#8486;&#10;pull-up&#10;resistor" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="900" y="820" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="r_pullup_lbl" value="One end &#8594; +3.3V rail&#10;Other end &#8594; GPIO5 (DATA)&#10;RESISTOR IS REQUIRED" style="text;html=1;align=center;fontSize=10;fontStyle=2;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="900" y="880" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="w_3v3_rail" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#b85450;strokeWidth=3;" edge="1" parent="1" source="esp32_3v3" target="rail_pos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w_gnd_rail" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#6c8ebf;strokeWidth=3;" edge="1" parent="1" source="esp32_gnd" target="rail_neg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w_oled_vcc" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#b85450;strokeWidth=2;" edge="1" parent="1" source="oled_vcc" target="rail_pos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w_oled_gnd" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#6c8ebf;strokeWidth=2;" edge="1" parent="1" source="oled_gnd" target="rail_neg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w_oled_sda" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#9673a6;strokeWidth=2;" edge="1" parent="1" source="oled_sda" target="esp21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w_oled_scl" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#9673a6;strokeWidth=2;" edge="1" parent="1" source="oled_scl" target="esp22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w_max_vcc" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#b85450;strokeWidth=2;" edge="1" parent="1" source="max_vcc" target="rail_pos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w_max_gnd" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#6c8ebf;strokeWidth=2;" edge="1" parent="1" source="max_gnd" target="rail_neg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w_max_sda" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#9673a6;strokeWidth=2;" edge="1" parent="1" source="max_sda" target="esp21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w_max_scl" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#9673a6;strokeWidth=2;" edge="1" parent="1" source="max_scl" target="esp22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w_ds_vcc" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#b85450;strokeWidth=2;" edge="1" parent="1" source="ds_red" target="rail_pos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w_ds_gnd" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#6c8ebf;strokeWidth=2;" edge="1" parent="1" source="ds_blk" target="rail_neg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w_ds_data" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#d79b00;strokeWidth=3;" edge="1" parent="1" source="ds_yel" target="esp4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w_pullup_data" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#d79b00;strokeWidth=3;dashed=1;" edge="1" parent="1" source="r_pullup" target="esp4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w_pullup_vcc" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#d79b00;strokeWidth=3;dashed=1;" edge="1" parent="1" source="r_pullup" target="rail_pos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend" value="WIRE COLOUR KEY&#10;&#10;Red &#8212; +3.3V power (rail top)&#10;Black &#8212; GND (rail bottom)&#10;Purple &#8212; I2C SDA/SCL&#10;Orange &#8212; 1-Wire DATA (needs pull-up)&#10;Yellow dashes &#8212; pull-up resistor leg" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;align=left;verticalAlign=top;fontSize=11;spacingLeft=10;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1000" width="780" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="warn" value="! WARNINGS !&#10;MAX30102 VIN MUST be 3.3V, NOT 5V &#8212; 5V will damage it.&#10;DS18B20 MUST have the 4.7k&#8486; pull-up to +3.3V on its DATA pin, or the firmware says &#8220;not found&#8221;.&#10;OLED and MAX30102 share the same SDA/SCL pair (GPIO21/22). They have different I2C addresses (0x3C and 0x57) so they do not conflict." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#b85450;fontSize=11;fontStyle=1;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="840" y="1000" width="820" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="verify" value="EXPECTED SERIAL OUTPUT (after each step)&#10;&#10;After STEP 2: [OK] OLED detected.&#10;After STEP 3: [OK] MAX30102 found!  (and later: heartRate / spo2 numbers when a finger is on the sensor)&#10;After STEP 4: [OK] DS18B20 found!  (and later: a temperature in &deg;C every 5 s)&#10;MQTT: a CONNACK byte pair 20 00 (success). 20 02 means &#8220;identifier rejected&#8221; &#8212; the broker has no matching username/password in passwd." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1090" width="1620" height="10" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

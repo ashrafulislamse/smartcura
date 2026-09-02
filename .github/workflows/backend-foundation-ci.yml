@@ -1,0 +1,81 @@
+name: Backend Foundation CI
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'apps/api/apps/**'
+      - 'apps/api/packages/**'
+      - 'apps/api/test/**'
+      - 'apps/api/package.json'
+      - 'apps/api/package-lock.json'
+      - 'apps/api/tsconfig*.json'
+      - '.github/workflows/backend-foundation-ci.yml'
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'apps/api/apps/**'
+      - 'apps/api/packages/**'
+      - 'apps/api/test/**'
+      - 'apps/api/package.json'
+      - 'apps/api/package-lock.json'
+      - 'apps/api/tsconfig*.json'
+      - '.github/workflows/backend-foundation-ci.yml'
+
+jobs:
+  type-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.19.0'
+          cache: npm
+          cache-dependency-path: apps/api/package-lock.json
+      - name: Install pinned backend workspace
+        run: |
+          npm install --global npm@10.9.2 --ignore-scripts --no-audit --no-fund
+          npm ci --ignore-scripts --no-audit --no-fund
+      - name: Type-check API, worker, database, and observability packages
+        run: npm run type-check
+      # `npm run db:generate` deliberately is NOT the drift gate here.
+      #
+      # It used to be, and it can never pass: the migrations in this repository are
+      # hand-written because they carry triggers, partitioned tables, PL/pgSQL
+      # functions and DO-block assertions drizzle cannot express, and because enum
+      # additions must be split across transactions. Snapshots therefore stop at
+      # 0018, so drizzle compares the current schema against a stale baseline and
+      # mints a phantom migration on every run. `tools/schema-drift.mjs` documents
+      # this and exists for exactly that reason.
+      #
+      # Replaced with the checks that DO hold without a database:
+      - name: Verify every migration is registered exactly once and in order
+        run: |
+          node -e "
+          const fs = require('node:fs');
+          const dir = 'packages/database/drizzle';
+          const files = fs.readdirSync(dir).filter((f) => f.endsWith('.sql')).sort()
+            .map((f) => f.replace(/\.sql$/, ''));
+          const journal = JSON.parse(fs.readFileSync(dir + '/meta/_journal.json', 'utf8'));
+          const tags = journal.entries.map((e) => e.tag);
+          const problems = [];
+          if (tags.length !== files.length) problems.push('journal has ' + tags.length + ' entries for ' + files.length + ' files');
+          files.forEach((file, i) => {
+            if (tags[i] !== file) problems.push('position ' + i + ': journal says ' + tags[i] + ', disk says ' + file);
+            if (journal.entries[i] && journal.entries[i].idx !== i) problems.push(file + ' has idx ' + journal.entries[i].idx + ', expected ' + i);
+            if (!file.startsWith(String(i).padStart(4, '0'))) problems.push(file + ' does not start with its index ' + i);
+          });
+          if (problems.length) { console.error('migration registration is broken:'); problems.forEach((p) => console.error('  - ' + p)); process.exit(1); }
+          console.log('migrations: ' + files.length + ' files, all registered in order');
+          "
+      # Includes the route/contract agreement, success-status agreement, schema
+      # compatibility, PHI redaction, step-up matrix and production dependency-graph
+      # guards. A type-check alone would not have caught any of the defects those
+      # tests were written for.
+      - name: Run the backend test suite
+        run: npm test

@@ -1,0 +1,67 @@
+# Keep the build context small. The Dockerfile copies what it needs explicitly,
+# so anything not matched here is invisible to the daemon.
+
+# Source control — never needed in the image.
+.git
+.gitignore
+.github
+
+# Local env files. The Dockerfile only consumes build args; never COPY an .env.
+.env
+.env.*
+!.env.example
+
+# Build output and cache.
+.next
+out
+dist
+build
+
+# Dependencies — installed inside the image.
+node_modules
+.npm
+.pnpm-store
+
+# Test artifacts and Playwright browsers.
+test-results
+playwright-report
+playwright/.cache
+tests/**/snapshots
+tests/e2e/.auth
+
+# Editor / OS noise.
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# Logs and scratch.
+*.log
+.scratch
+coverage
+.eslintcache
+
+# The other apps in the monorepo. Only apps/web-portal is in this image.
+apps/api
+apps/doctor-app
+apps/patient-app
+apps/driver-app
+apps/smartcura-backend
+packages
+tools
+docs
+design
+scripts
+report
+iot-firmware
+
+# Docs and meta files at the portal level that aren't part of the runtime.
+README.md
+CHANGELOG.md
+CONTRIBUTING.md
+DEPLOY_CHECKLIST.md
+DEVELOPMENT.md
+VPS_DEPLOYMENT.md
+VERSION
+VERSION_MANAGEMENT.md
+LICENSE

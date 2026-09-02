@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" role="img" aria-label="No prescription deliveries">
+  <title>No prescription deliveries illustration</title>
+  <rect x="34" y="24" width="52" height="56" rx="8" stroke="#DC2626" stroke-width="3"/>
+  <path d="M34 38h52" stroke="#DC2626" stroke-width="3"/>
+  <path d="M50 58h20" stroke="#EF4444" stroke-width="3" stroke-linecap="round"/>
+  <path d="M50 70h28" stroke="#EF4444" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="78" cy="86" r="10" stroke="#DC2626" stroke-width="3"/>
+  <path d="M74 86h8" stroke="#DC2626" stroke-width="3" stroke-linecap="round"/>
+  <path d="M18 102h16l8-8 8 12 8-8 8 6 8-8 8 10 8-8 8 6h16" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

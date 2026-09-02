@@ -1,0 +1,92 @@
+{
+  "name": "@smartcura/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./patient-profile-repository": {
+      "types": "./dist/patient-profile-repository.d.ts",
+      "default": "./dist/patient-profile-repository.js"
+    },
+    "./workstream-f-repository": {
+      "types": "./dist/workstream-f-repository.d.ts",
+      "default": "./dist/workstream-f-repository.js"
+    },
+    "./doctor-detail-repository": {
+      "types": "./dist/doctor-detail-repository.d.ts",
+      "default": "./dist/doctor-detail-repository.js"
+    },
+    "./profile-detail-events": {
+      "types": "./dist/profile-detail-events.d.ts",
+      "default": "./dist/profile-detail-events.js"
+    },
+    "./schema-profile-details": {
+      "types": "./dist/schema-profile-details.d.ts",
+      "default": "./dist/schema-profile-details.js"
+    },
+    "./procurement": {
+      "types": "./dist/procurement.d.ts",
+      "default": "./dist/procurement.js"
+    },
+    "./stage11": {
+      "types": "./dist/stage11.d.ts",
+      "default": "./dist/stage11.js"
+    },
+    "./finance": {
+      "types": "./dist/finance.d.ts",
+      "default": "./dist/finance.js"
+    },
+    "./emergency": {
+      "types": "./dist/emergency.d.ts",
+      "default": "./dist/emergency.js"
+    },
+    "./emergency-events": {
+      "types": "./dist/emergency-events.d.ts",
+      "default": "./dist/emergency-events.js"
+    },
+    "./dispatch": {
+      "types": "./dist/dispatch.d.ts",
+      "default": "./dist/dispatch.js"
+    },
+    "./pharmacy": {
+      "types": "./dist/pharmacy.d.ts",
+      "default": "./dist/pharmacy.js"
+    },
+    "./ai": {
+      "types": "./dist/ai.d.ts",
+      "default": "./dist/ai.js"
+    },
+    "./consultations": {
+      "types": "./dist/consultations.d.ts",
+      "default": "./dist/consultations.js"
+    },
+    "./clinical-templates": {
+      "types": "./dist/clinical-template-repository.d.ts",
+      "default": "./dist/clinical-template-repository.js"
+    },
+    "./appointments": {
+      "types": "./dist/appointments.d.ts",
+      "default": "./dist/appointments.js"
+    },
+    "./iot": {
+      "types": "./dist/iot.d.ts",
+      "default": "./dist/iot.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "generate": "drizzle-kit generate --config=drizzle.config.ts",
+    "migrate": "node dist/migrate.js",
+    "probe": "tsx src/foundation-probe.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.2",
+    "pg": "8.22.0"
+  },
+  "devDependencies": {
+    "@types/pg": "8.20.0",
+    "drizzle-kit": "0.31.10",
+    "tsx": "4.23.1"
+  }
+}

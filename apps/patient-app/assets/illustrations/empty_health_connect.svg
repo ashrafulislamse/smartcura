@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" role="img" aria-label="No Health Connect data">
+  <title>No Health Connect data illustration</title>
+  <rect x="62" y="24" width="34" height="52" rx="6" stroke="#2563EB" stroke-width="3"/>
+  <rect x="24" y="44" width="34" height="52" rx="6" stroke="#06B6D4" stroke-width="3"/>
+  <path d="M44 50c-6 0-10 8-10 14s6 10 10 10 10-4 10-10" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M38 72h6" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M72 42h6" stroke="#06B6D4" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M16 100h16l8-8 8 12 8-8 8 6 8-8 8 10 8-8 8 6h16" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

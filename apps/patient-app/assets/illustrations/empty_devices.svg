@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" role="img" aria-label="No devices">
+  <title>No devices illustration</title>
+  <rect x="38" y="18" width="44" height="72" rx="8" stroke="#2563EB" stroke-width="3"/>
+  <rect x="44" y="28" width="32" height="42" rx="4" stroke="#94A3B8" stroke-width="2.5"/>
+  <path d="M58 38c-8 0-12 8-12 14s6 12 12 12 12-6 12-12" stroke="#EF4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="60" cy="92" r="3" fill="#2563EB"/>
+  <path d="M18 104h16l8-10 8 14 8-10 8 6h28" stroke="#06B6D4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

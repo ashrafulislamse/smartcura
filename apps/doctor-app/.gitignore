@@ -1,0 +1,198 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# iOS/XCode related
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/.generated/
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# Android related
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/key.properties
+*.jks
+
+# Web related
+lib/generated_plugin_registrant.dart
+
+# Exceptions to above rules.
+!**/ios/**/default.mode1v3
+!**/ios/**/default.mode2v3
+!**/ios/**/default.pbxuser
+!**/ios/**/default.perspectivev3
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
+firebase_options.dart
+
+# Coverage
+coverage/
+*.lcov
+
+# Test related
+test/.test_coverage.dart
+test_driver/
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Documentation generated files
+doc/api/
+
+# Build outputs
+*.apk
+*.aab
+*.ipa
+*.app
+*.exe
+*.dmg
+
+# Logs
+logs/
+*.log
+
+# IDE specific
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Package manager
+.packages
+pubspec.lock
+
+# Flutter version manager
+.fvm/
+
+# Analysis
+.dart_tool/
+analysis_options.yaml
+
+# Secrets
+secrets/
+*.pem
+*.key
+*.cert
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache
+.cache/
+cache/
+
+# Node modules (if using any JS tools)
+node_modules/
+
+# Documentation junk files (from root)
+DOCTOR_APP_*.md
+DRIVER_APP_*.md
+PATIENT_APP_*.md
+GITHUB_*.md
+QUICK_*.md
+RBAC_*.md
+SUBMISSION_*.md
+START_HERE.md
+temp_*.md

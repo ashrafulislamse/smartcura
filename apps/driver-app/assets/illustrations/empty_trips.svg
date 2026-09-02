@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" role="img" aria-label="No trips available">
+  <title>No trips available illustration</title>
+  <!-- Delivery van on a dotted route with destination pin -->
+  <path d="M14 88h16l8-8 8 12 8-10 8 6 8-8 8 10 8-8 8 6h16" stroke="#94A3AF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 4"/>
+  <circle cx="92" cy="82" r="8" stroke="#FBBF24" stroke-width="2.5"/>
+  <circle cx="92" cy="82" r="3" fill="#FBBF24"/>
+  <rect x="22" y="52" width="52" height="28" rx="6" stroke="#DC2626" stroke-width="3"/>
+  <circle cx="32" cy="80" r="6" stroke="#DC2626" stroke-width="2.5"/>
+  <circle cx="64" cy="80" r="6" stroke="#DC2626" stroke-width="2.5"/>
+  <path d="M74 66h14l4-14v-4H74v18z" stroke="#DC2626" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M74 52v14" stroke="#DC2626" stroke-width="3"/>
+  <path d="M30 64h36" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M30 58h28" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

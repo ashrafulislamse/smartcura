@@ -1,0 +1,23 @@
+# SmartCura MQTT access control list.
+#
+# Two kinds of client connect to this broker:
+#
+# 1. The worker's ingestion bridge — one service account that subscribes to
+#    every device's vitals topic. Its username is "smartcura-bridge".
+#
+# 2. IoT devices — each connects with its UUIDv7 device_id as the username and
+#    may publish only to its own vitals topic. The pattern rule below uses %u
+#    (the authenticated username) so every device is covered by a single line
+#    without per-device entries.
+#
+# The backend re-validates that the username matches the topic segment in
+# mqtt-ingestion.handler.ts, so even a broker misconfiguration cannot turn into
+# a cross-patient write without the handler also failing.
+
+# Bridge: subscribe to all device vitals topics.
+user smartcura-bridge
+topic read smartcura/v1/devices/+/vitals
+
+# Devices: each may publish only to its own vitals topic.
+# %u is replaced with the authenticated username (the device's UUIDv7 id).
+pattern write smartcura/v1/devices/%u/vitals

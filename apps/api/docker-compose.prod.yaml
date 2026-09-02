@@ -1,0 +1,283 @@
+# Coolify production stack for the SmartCura backend.
+#
+# This is the production version of apps/api/docker-compose.yaml for Coolify.
+# It does NOT include Caddy — Coolify's own reverse proxy handles TLS.
+#
+# Domains to set in Coolify (all pointing to the same VPS):
+#   - api.smartcura.app     → api service     (port 3000)
+#   - livekit.smartcura.app → livekit service (port 7880)
+#   - mqtt.smartcura.app    → mosquitto service (port 9001, WebSocket)
+#
+# The web portal is deployed as a separate Coolify resource at portal.smartcura.app.
+#
+# Required VPS firewall rules:
+#   - 80/tcp, 443/tcp                    (Coolify / HTTP-HTTPS)
+#   - 7880/tcp, 7881/tcp, 7882/udp       (LiveKit signaling + WebRTC media)
+#   - 9001/tcp                           (Mosquitto WebSocket, only if public IoT)
+#
+# FYP demo note: payment and push providers remain deterministic; only AI is required
+# to use a real network model in production. The worker logs a warning at startup.
+# A top-level `name` is REQUIRED for Coolify: without it, Coolify's compose parser
+# (compose_parsing_version 5) emits an empty services set and `docker compose up -d`
+# fails with "no service selected". Earlier commits that dropped this name broke the
+# deploy. The string itself is arbitrary; it only needs to be present.
+name: smartcura-prod-coolify
+
+services:
+  postgres:
+    image: postgres:18.4-alpine3.23@sha256:6ae038add203ffd3e33c20dfff45f6d714afa194facbf0f533b9204cb63cc5ef
+    environment:
+      POSTGRES_DB: smartcura
+      POSTGRES_USER: smartcura
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    # PostgreSQL 18+ moved its data directory to /var/lib/postgresql (PGDATA is
+    # /var/lib/postgresql/18/docker). The old /var/lib/postgresql/data path no
+    # longer exists in the image, so mounting it makes the container start then
+    # immediately fall unhealthy. Mount the parent path on 18+.
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U smartcura -d smartcura']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  clamav:
+    image: clamav/clamav:latest
+    volumes:
+      - clamav_data:/var/lib/clamav
+    # ClamAV needs a moment to download the signature database on first boot.
+    healthcheck:
+      test: ['CMD', 'clamdscan', '--ping', '1']
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 120s
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  mosquitto:
+    # Custom image: see deploy/mosquitto/Dockerfile. The ACL is baked in; the
+    # password file is generated at runtime from SMARTCURA_MQTT_PASSWORD on
+    # first boot, then persists in the mosquitto_config volume so device
+    # credentials added via setup-mqtt-auth.sh survive redeploys.
+    # This avoids Coolify's bind-mount shadowing bug and the musl EAI_AGAIN bug
+    # (fixed by binding to 0.0.0.0 in mosquitto.conf).
+    build:
+      context: deploy/mosquitto
+      dockerfile: Dockerfile
+    environment:
+      SMARTCURA_MQTT_PASSWORD: ${SMARTCURA_MQTT_PASSWORD:?MQTT bridge password required}
+    volumes:
+      - mosquitto_data:/mosquitto/data
+      # Persist /mosquitto/config/auth across redeploys. Without this, any
+      # device credential added via setup-mqtt-auth.sh add-device is lost the
+      # next time Coolify recreates the container, because the auth dir is
+      # baked into the image and not a volume.
+      - mosquitto_config:/mosquitto/config/auth
+    ports:
+      - '9001:9001'
+    # Coolify/Traefik must use Mosquitto's WebSocket listener, not the native
+    # MQTT listener on 1883. Without this explicit target, the generated route
+    # can select 1883 and return HTTP 502 for mqtt.smartcura.app.
+    labels:
+      - traefik.http.services.mosquitto.loadbalancer.server.port=9001
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  livekit:
+    image: livekit/livekit-server:v1.8.0
+    # Coolify materializes bind-mount sources as directories, so we cannot
+    # mount ./deploy/livekit/livekit.yaml. Instead, generate the config in-
+    # container using echo (printf's \n gets double-escaped by Coolify).
+    # Keys are provided via the LIVEKIT_KEYS env var (not in the YAML config)
+    # because LiveKit reads them natively from that env var. The format MUST
+    # be "key: secret" with a space after the colon — LiveKit rejects it
+    # without the space ("Could not parse keys").
+    command: >-
+      sh -c "echo 'port: 7880' > /tmp/livekit.yaml &&
+      echo 'bind_addresses:' >> /tmp/livekit.yaml &&
+      echo '  - \"\"' >> /tmp/livekit.yaml &&
+      echo 'rtc:' >> /tmp/livekit.yaml &&
+      echo '  tcp_port: 7881' >> /tmp/livekit.yaml &&
+      echo '  udp_port: 7882' >> /tmp/livekit.yaml &&
+      echo '  use_external_ip: true' >> /tmp/livekit.yaml &&
+      echo 'redis:' >> /tmp/livekit.yaml &&
+      echo '  address: redis:6379' >> /tmp/livekit.yaml &&
+      echo '  db: 0' >> /tmp/livekit.yaml &&
+      echo 'logging:' >> /tmp/livekit.yaml &&
+      echo '  json: false' >> /tmp/livekit.yaml &&
+      echo '  level: info' >> /tmp/livekit.yaml &&
+      exec livekit-server --config /tmp/livekit.yaml"
+    environment:
+      LIVEKIT_REDIS_HOST: redis:6379
+      LIVEKIT_KEYS: "${SMARTCURA_LIVEKIT_API_KEY}: ${SMARTCURA_LIVEKIT_API_SECRET}"
+      LIVEKIT_NODE_IP: ${LIVEKIT_NODE_IP:?LIVEKIT_NODE_IP is required for self-hosted video}
+    ports:
+      - '7880:7880'
+      - '7881:7881'
+      - '7882:7882/udp'
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  api:
+    image: smartcura-api:coolify
+    build:
+      # Coolify evaluates this compose file from the repository's apps/api project root.
+      context: .
+      dockerfile: Dockerfile
+    # Run migrations as part of API startup, then start the server. This avoids
+    # a separate migrate container whose expected exit triggers Coolify to
+    # restart the entire compose project.
+    command: ["dumb-init", "sh", "-c", "node packages/database/dist/migrate.js && node apps/api/dist/main.js"]
+    environment:
+      NODE_ENV: production
+      SMARTCURA_BUILD_VERSION: ${SMARTCURA_BUILD_VERSION:-0.1.0}
+      SMARTCURA_API_HOST: 0.0.0.0
+      SMARTCURA_API_PORT: 3000
+      SMARTCURA_API_ALLOWED_ORIGINS: ${SMARTCURA_API_ALLOWED_ORIGINS:?allowed origins required}
+      SMARTCURA_SESSION_CSRF_SECRET: ${SMARTCURA_SESSION_CSRF_SECRET:?CSRF secret required}
+      DATABASE_URL: postgresql://smartcura:${POSTGRES_PASSWORD}@postgres:5432/smartcura?sslmode=disable
+      SMARTCURA_IDENTITY_ADAPTER: firebase
+      SMARTCURA_FIREBASE_PROJECT_ID: ${SMARTCURA_FIREBASE_PROJECT_ID:?Firebase project ID required}
+      SMARTCURA_VIDEO_ADAPTER: livekit
+      SMARTCURA_LIVEKIT_URL: ${SMARTCURA_LIVEKIT_URL:?LiveKit URL required}
+      SMARTCURA_LIVEKIT_API_KEY: ${SMARTCURA_LIVEKIT_API_KEY:?LiveKit API key required}
+      SMARTCURA_LIVEKIT_API_SECRET: ${SMARTCURA_LIVEKIT_API_SECRET:?LiveKit API secret required}
+      SMARTCURA_PUSH_TOKEN_ENCRYPTION_KEY: ${SMARTCURA_PUSH_TOKEN_ENCRYPTION_KEY:?push token encryption key required}
+      # Redis for the WebSocket chat gateway and the per-route rate limiter.
+      # Points at the redis service on the internal Docker network. The
+      # throttler uses this for its Redis-backed storage so rate limits are
+      # shared across API instances; the chat gateway uses it for pub/sub.
+      SMARTCURA_REDIS_URL: redis://redis:6379
+      SMARTCURA_AI_PROVIDER: openai
+      SMARTCURA_AI_API_KEY: ${SMARTCURA_AI_API_KEY:?AI API key required}
+      SMARTCURA_AI_BASE_URL: ${SMARTCURA_AI_BASE_URL:-https://api.openai.com/v1}
+      SMARTCURA_AI_MODEL: ${SMARTCURA_AI_MODEL:-gpt-4o-mini}
+      SMARTCURA_AI_JSON_MODE: ${SMARTCURA_AI_JSON_MODE:-true}
+      SMARTCURA_OBJECT_STORAGE_PROVIDER: r2
+      SMARTCURA_R2_ACCOUNT_ID: ${SMARTCURA_R2_ACCOUNT_ID:?R2 account ID required}
+      SMARTCURA_R2_BUCKET: ${SMARTCURA_R2_BUCKET:?R2 bucket required}
+      SMARTCURA_R2_ENDPOINT: ${SMARTCURA_R2_ENDPOINT:?R2 endpoint required}
+      SMARTCURA_R2_ACCESS_KEY_ID: ${SMARTCURA_R2_ACCESS_KEY_ID:?R2 access key required}
+      SMARTCURA_R2_SECRET_ACCESS_KEY: ${SMARTCURA_R2_SECRET_ACCESS_KEY:?R2 secret key required}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "--eval", "fetch('http://localhost:3000/api/v1/health').then(r => r.ok ? process.exit(0) : process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  worker:
+    image: smartcura-worker:coolify
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      SMARTCURA_BUILD_VERSION: ${SMARTCURA_BUILD_VERSION:-0.1.0}
+      DATABASE_URL: postgresql://smartcura:${POSTGRES_PASSWORD}@postgres:5432/smartcura?sslmode=disable
+      SMARTCURA_WORKER_POLL_INTERVAL_MS: ${SMARTCURA_WORKER_POLL_INTERVAL_MS:-5000}
+      SMARTCURA_WORKER_LEASE_MS: ${SMARTCURA_WORKER_LEASE_MS:-30000}
+      SMARTCURA_WORKER_BATCH_SIZE: ${SMARTCURA_WORKER_BATCH_SIZE:-10}
+      SMARTCURA_WORKER_MAX_ATTEMPTS: ${SMARTCURA_WORKER_MAX_ATTEMPTS:-10}
+      SMARTCURA_MALWARE_SCANNER: clamav
+      SMARTCURA_CLAMAV_HOST: clamav
+      SMARTCURA_CLAMAV_PORT: 3310
+      SMARTCURA_PAYMENT_PROVIDER: deterministic
+      # Env-substituted so a real provider can be enabled without editing the
+      # compose file; the default keeps the FYP demo bootable with no secrets.
+      SMARTCURA_PUSH_PROVIDER: ${SMARTCURA_PUSH_PROVIDER:-deterministic}
+      SMARTCURA_EMAIL_PROVIDER: ${SMARTCURA_EMAIL_PROVIDER:-deterministic}
+      # The worker must unseal FCM tokens with the SAME key the API sealed them
+      # with; omitting it here made every push fail token_decrypt_error.
+      SMARTCURA_PUSH_TOKEN_ENCRYPTION_KEY: ${SMARTCURA_PUSH_TOKEN_ENCRYPTION_KEY:-0000000000000000000000000000000000000000000000000000000000000000}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL:-}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY:-}
+      # Hostinger Email SMTP (SMARTCURA_EMAIL_PROVIDER=smtp).
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_SECURE: ${SMTP_SECURE:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-}
+      SMARTCURA_MQTT_URL: ${SMARTCURA_MQTT_URL:-mqtt://mosquitto:1883}
+      SMARTCURA_MQTT_USERNAME: ${SMARTCURA_MQTT_USERNAME:-smartcura-bridge}
+      SMARTCURA_MQTT_PASSWORD: ${SMARTCURA_MQTT_PASSWORD:?MQTT bridge password required}
+      SMARTCURA_MQTT_CLIENT_ID: ${SMARTCURA_MQTT_CLIENT_ID:-smartcura-worker}
+      SMARTCURA_AI_PROVIDER: openai
+      SMARTCURA_AI_API_KEY: ${SMARTCURA_AI_API_KEY}
+      SMARTCURA_AI_BASE_URL: ${SMARTCURA_AI_BASE_URL:-https://api.openai.com/v1}
+      SMARTCURA_AI_MODEL: ${SMARTCURA_AI_MODEL:-gpt-4o-mini}
+      # The Cline gateway (minimax-m3) does not support response_format:
+      # json_object and rejects it with a 400. Disable JSON mode so the
+      # provider sends plain prompts; the worker still parses the response
+      # as JSON with a fallback for non-JSON output.
+      SMARTCURA_AI_JSON_MODE: ${SMARTCURA_AI_JSON_MODE:-false}
+      SMARTCURA_OBJECT_STORAGE_PROVIDER: r2
+      SMARTCURA_R2_ACCOUNT_ID: ${SMARTCURA_R2_ACCOUNT_ID}
+      SMARTCURA_R2_BUCKET: ${SMARTCURA_R2_BUCKET}
+      SMARTCURA_R2_ENDPOINT: ${SMARTCURA_R2_ENDPOINT}
+      SMARTCURA_R2_ACCESS_KEY_ID: ${SMARTCURA_R2_ACCESS_KEY_ID}
+      SMARTCURA_R2_SECRET_ACCESS_KEY: ${SMARTCURA_R2_SECRET_ACCESS_KEY}
+    command: node apps/worker/dist/main.js
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+      clamav:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+volumes:
+  postgres_data:
+  redis_data:
+  mosquitto_data:
+  # Holds /mosquitto/config/auth so the bridge + device credentials in passwd
+  # and the ACL survive Coolify recreating the mosquitto container on deploy.
+  mosquitto_config:
+  clamav_data:
+
+networks:
+  smartcura:
+    driver: bridge

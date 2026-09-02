@@ -1,0 +1,127 @@
+name: smartcura_doctor_app
+description: "SmartCura Doctor Mobile App - Professional healthcare platform for doctors"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI & Design
+  cupertino_icons: ^1.0.6
+  google_fonts: ^6.1.0
+  flutter_svg: ^2.0.9
+  cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
+  lottie: ^3.0.0
+
+  # State Management
+  flutter_riverpod: ^2.4.10
+  riverpod_annotation: ^2.3.3
+
+  # Navigation
+  go_router: ^13.0.0
+
+  # Network & API
+  dio: ^5.4.0
+  pretty_dio_logger: ^1.3.1
+  connectivity_plus: ^7.0.0
+
+  # Storage
+  shared_preferences: ^2.2.2
+  flutter_secure_storage: ^9.0.0
+  sqflite: ^2.3.2
+  path_provider: ^2.1.2
+
+  # Authentication
+  local_auth: ^2.1.8
+
+  # Firebase
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.16.0
+  firebase_messaging: ^14.7.10
+  firebase_storage: ^11.6.0
+  firebase_analytics: ^10.8.0
+
+  # Video Call (LiveKit for video consultations)
+  livekit_client: ^2.10.0
+
+  # Local Notifications (push notification display when app is foregrounded)
+  flutter_local_notifications: ^17.2.3
+
+  # Real-time Communication
+  socket_io_client: ^2.0.3+1
+
+  # Payment
+  flutter_stripe: ^10.1.1
+
+  # Media
+  image_picker: ^1.0.7
+  permission_handler: ^11.2.0
+
+  # Utils
+  intl: ^0.18.1
+  url_launcher: ^6.2.4
+  share_plus: ^10.0.0
+  package_info_plus: ^8.0.0
+  device_info_plus: ^12.4.0
+  flutter_dotenv: ^5.1.0
+  uuid: ^4.3.3
+
+  # Date & Time
+  table_calendar: ^3.0.9
+
+  # Charts & Graphs
+  fl_chart: ^0.66.2
+
+  # PDF Generation (for prescriptions)
+  pdf: ^3.10.7
+  printing: ^5.11.1
+
+  # Signature (for prescriptions)
+  signature: ^5.4.1
+
+  # QR Code
+  qr_flutter: ^4.1.0
+
+  # Cryptography (SHA-256 for verification document upload integrity)
+  crypto: ^3.0.3
+
+  # SmartCura generated Dart contracts (path dependency).
+  # doctor-app is at apps/doctor-app; the contracts package is at apps/api/...,
+  # so the relative path goes up one level to apps/, then into api/.
+  smartcura_contracts:
+    path: ../api/packages/contracts/generated/dart
+  app_links: ^7.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Linting
+  flutter_lints: ^3.0.1
+
+  # Code Generation
+  build_runner: ^2.4.8
+  riverpod_generator: ^2.3.9
+  json_serializable: ^6.7.1
+
+  # Testing
+  mockito: ^5.4.4
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  # Assets
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/illustrations/
+    - assets/animations/
+
+  # Fonts (using Google Fonts - no need to bundle)

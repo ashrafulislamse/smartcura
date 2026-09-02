@@ -1,0 +1,107 @@
+/* SmartCura public-site tokens — "Living Pulse"
+ *
+ * Locked design tokens for the marketing/public site that lives in the (public)
+ * route group of apps/web-portal. Every color below is an OKLCH declaration; hex
+ * values are shown as comments for traceability to design/brand/README.md only.
+ * Reference tokens by name (var(--color-pulse)) — never inline raw values.
+ *
+ * Brand mapping (from design/brand/README.md):
+ *   Medical Blue #2563EB → --color-pulse / --color-brand-blue (same hue family)
+ *   Pulse cyan     #06B6D4 / #67E8F9 → --color-pulse (light) / --color-pulse-night (dark)
+ *   Doctor teal    #0F766E → --color-role-doctor
+ *   Driver red     #DC2626 → --color-role-driver / --color-critical
+ *   Portal navy    #1E40AF → --color-brand-navy / --color-role-portal
+ *   Ink            #0F172A → --color-ink
+ */
+
+:root {
+  /* Surfaces */
+  --color-paper: oklch(98% 0.004 255);   /* #F9FAFB equivalent — page body */
+  --color-paper-2: oklch(95.5% 0.006 255); /* raised panels, cards */
+  --color-night: oklch(20% 0.045 258);   /* #0F172A-side dark hero base */
+  --color-night-deep: oklch(16% 0.040 260); /* #172554 brand navy */
+  --color-night-edge: oklch(24% 0.060 220); /* cyan-leaning dark */
+
+  /* Ink */
+  --color-ink: oklch(23% 0.035 260);     /* #0F172A — primary text */
+  --color-ink-2: oklch(42% 0.030 258);   /* secondary text */
+  --color-ink-3: oklch(58% 0.025 255);   /* tertiary / placeholders */
+  --color-ink-inverse: oklch(98% 0.004 255);
+
+  /* Trace / accent */
+  --color-pulse: oklch(72% 0.115 215);   /* #06B6D4 trace on paper */
+  --color-pulse-night: oklch(87% 0.090 210); /* #67E8F9 trace on night */
+  --color-pulse-soft: oklch(94% 0.040 215); /* tint for pulse backgrounds */
+
+  /* Brand */
+  --color-brand-blue: oklch(55% 0.200 262); /* #2563EB — CTAs, links */
+  --color-brand-blue-strong: oklch(48% 0.215 263); /* hover */
+  --color-brand-navy: oklch(45% 0.190 265); /* #1E40AF */
+
+  /* Role colors (the four surfaces) */
+  --color-role-patient: oklch(55% 0.200 262);
+  --color-role-doctor: oklch(51% 0.090 180); /* #0F766E */
+  --color-role-driver: oklch(58% 0.220 27);  /* #DC2626 */
+  --color-role-portal: oklch(45% 0.190 265);
+
+  /* Semantics — reserved, never decorative */
+  --color-critical: oklch(55% 0.220 27);
+  --color-ok: oklch(60% 0.130 155);
+
+  /* Rules, focus */
+  --rule-hairline: oklch(90% 0.006 255);
+  --rule-strong: oklch(80% 0.008 255);
+  --color-focus: oklch(72% 0.115 215);
+  --focus-ring: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-focus);
+
+  /* Type */
+  --font-display: var(--font-manrope), system-ui, sans-serif;
+  --font-body: var(--font-manrope), system-ui, sans-serif;
+  --font-data: var(--font-data-mono, "IBM Plex Mono"), ui-monospace, monospace;
+  --font-editorial: var(--font-playfair), Georgia, serif;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+  --dur-slow: 600ms;
+
+  /* Space (4pt scale) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+  --space-7: 64px;
+  --space-8: 96px;
+  --space-9: 128px;
+  --space-10: 192px;
+
+  /* Type scale (1.25 ratio, mobile-first) */
+  --text-0: 0.75rem;    /* mono captions */
+  --text-1: 0.875rem;
+  --text-2: 1rem;
+  --text-3: 1.125rem;
+  --text-4: 1.375rem;
+  --text-5: 1.75rem;
+  --text-6: 2.25rem;
+  --text-display: clamp(2.75rem, 6vw, 4.5rem);  /* hero, 21–50 chars */
+  --text-display-s: clamp(2.25rem, 4.5vw, 3.25rem);
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+}
+
+/* Optional reduced-motion default */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+  }
+}

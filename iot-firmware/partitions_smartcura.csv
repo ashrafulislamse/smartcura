@@ -1,0 +1,17 @@
+# SmartCura ESP32 Vitals Monitor partition table
+# 4 MB flash, OTA-enabled, minimal SPIFFS (not used by firmware)
+#
+# Layout:
+#   - boot:        0x00000 - 0x10000  (reserved by bootloader, not in table)
+#   - nvs:         0x09000 - 0x0E000  (20 KB)
+#   - otadata:     0x0E000 - 0x10000  (8 KB)
+#   - app0:        0x10000 - 0x200000 (1.97 MB)
+#   - app1:        0x200000 - 0x3F0000 (1.97 MB)
+#   - spiffs:      0x3F0000 - 0x400000 (64 KB)
+#
+# Name,   Type, SubType, Offset,  Size,    Flags
+nvs,      data, nvs,     0x9000,  0x5000,
+otadata,  data, ota,     0xE000,  0x2000,
+app0,     app,  ota_0,   0x10000, 0x1F0000,
+app1,     app,  ota_1,   0x200000,0x1F0000,
+spiffs,   data, spiffs,  0x3F0000,0x10000,

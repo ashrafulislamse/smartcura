@@ -1,0 +1,4 @@
+# Keep Linux container files as LF even on Windows clients with core.autocrlf=true.
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.conf text eol=lf

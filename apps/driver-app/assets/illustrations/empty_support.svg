@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" role="img" aria-label="Support contact">
+  <title>Support contact illustration</title>
+  <!-- Support headset with a care pulse and speech bubble -->
+  <path d="M38 58c0-16 10-26 22-26s22 10 22 26" stroke="#DC2626" stroke-width="3" stroke-linecap="round"/>
+  <path d="M32 58v14c0 6 4 10 10 10h6" stroke="#DC2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M88 58v14c0 6-4 10-10 10h-6" stroke="#DC2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="44" y="78" width="32" height="10" rx="5" stroke="#DC2626" stroke-width="3"/>
+  <path d="M60 38v12l6 4" stroke="#EF4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M72 26h26a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6h-8l-8 8v-8h-10a6 6 0 0 1-6-6V32a6 6 0 0 1 6-6z" stroke="#94A3AF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="82" cy="40" r="3" fill="#FBBF24"/>
+  <circle cx="92" cy="40" r="3" fill="#FBBF24"/>
+  <circle cx="102" cy="40" r="3" fill="#FBBF24"/>
+  <path d="M14 106h16l8-8 8 12 8-10 8 6 8-8 8 10 8-8 8 6h16" stroke="#94A3AF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

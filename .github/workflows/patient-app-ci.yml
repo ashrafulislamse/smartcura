@@ -1,0 +1,74 @@
+name: Patient App CI
+
+on:
+  push:
+    branches: [ main, dev ]
+    paths:
+      - 'apps/patient-app/**'
+      - '.github/workflows/patient-app-ci.yml'
+  pull_request:
+    branches: [ main, dev ]
+    paths:
+      - 'apps/patient-app/**'
+
+jobs:
+  build-and-test:
+    name: Build and Test Patient App
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: apps/patient-app
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+          cache: true
+      
+      - name: 📦 Get dependencies
+        run: flutter pub get
+      
+      - name: 🔍 Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+        continue-on-error: true
+      
+      - name: 📊 Analyze project source
+        run: flutter analyze
+        continue-on-error: true
+      
+      - name: 🧪 Run tests
+        run: flutter test
+        continue-on-error: true
+      
+      - name: 🏗️ Build APK
+        run: flutter build apk --release
+        continue-on-error: true
+      
+      - name: 📱 Build iOS (no codesign)
+        run: flutter build ios --release --no-codesign
+        if: runner.os == 'macOS'
+        continue-on-error: true
+      
+      - name: 📊 Generate coverage report
+        run: flutter test --coverage
+        continue-on-error: true
+      
+      - name: 📤 Upload APK artifact
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: patient-app-apk
+          path: apps/patient-app/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 7

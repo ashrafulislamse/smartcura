@@ -1,0 +1,76 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Required by google_maps_flutter to download map tiles and by the
+         driver app to stream the driver's location via geolocator. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Required by geolocator to obtain the device GPS/network location. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <!-- POST_NOTIFICATIONS is required on Android 13+ (API 33+) to display
+         notifications. The FCM service requests runtime permission via
+         FirebaseMessaging.instance.requestPermission, but the manifest
+         declaration is needed for the system to grant it. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <application
+        android:label="smartcura_driver_app"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+
+        <!-- Google Maps Android SDK API key.
+             The value is read from res/values/strings.xml
+             (GOOGLE_MAPS_API_KEY). Replace the placeholder there with a real
+             key from the Google Cloud Console before running on a device. -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/GOOGLE_MAPS_API_KEY" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <!-- Specifies an Android theme to apply to this Activity as soon as
+                 the Android process has started. This theme is visible to the user
+                 while the Flutter UI initializes. After that, this theme continues
+                 to determine the Window background behind the Flutter UI. -->
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
+              />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- SmartCura deep links (smartcura://orders/{uuid} etc.). Push
+                 payloads from the worker carry a deep_link with this scheme;
+                 DeepLinkHandler maps the URI to an in-app route. Hosts owned
+                 by the patient/doctor apps (prescriptions, pharmacy-orders,
+                 appointments, conversations) also resolve here and fall back
+                 to the notification centre. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="smartcura"/>
+            </intent-filter>
+        </activity>
+        <!-- Don't delete the meta-data below.
+             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+    <!-- Required to query activities that can process text, see:
+         https://developer.android.com/training/package-visibility and
+         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+
+         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
+</manifest>

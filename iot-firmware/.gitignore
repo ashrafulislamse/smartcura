@@ -1,0 +1,10 @@
+# Real credentials for the ESP32 firmware. NEVER commit this file.
+# Copy from secrets.h.example and fill in your actual values, then flash.
+secrets.h
+secrets.h.bak
+
+# PlatformIO build artifacts
+.pio/
+
+# Old Arduino IDE build artifacts
+smartcura_vitals_monitor/build/

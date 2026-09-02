@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none" role="img" aria-label="SmartCura Portal icon">
+  <title>SmartCura Admin Portal — app icon</title>
+  <!--
+    Admin portal: shield of governance carrying a live pulse over analytics bars,
+    on the deep command blue tile.
+    Meaning: secure oversight of the whole platform — vitals, operations, decisions.
+    Platform primary: #1E40AF.
+  -->
+  <defs>
+    <linearGradient id="wpbg" x1="140" y1="60" x2="900" y2="1010" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2563EB"/>
+      <stop offset="0.55" stop-color="#1E40AF"/>
+      <stop offset="1" stop-color="#172554"/>
+    </linearGradient>
+    <radialGradient id="wpglow" cx="330" cy="240" r="640" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#wpbg)"/>
+  <rect width="1024" height="1024" fill="url(#wpglow)"/>
+  <!-- shield -->
+  <path d="M512 156 L788 258 V470 C788 646 676 786 512 862 C348 786 236 646 236 470 V258 Z" stroke="#FFFFFF" stroke-width="58" stroke-linejoin="round" fill="none"/>
+  <!-- live pulse across the shield -->
+  <path d="M312 492 H424 L462 420 L508 556 L546 464 L566 492 H712" stroke="#67E8F9" stroke-width="46" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- operations analytics bars -->
+  <g fill="#FFFFFF" fill-opacity="0.92">
+    <rect x="418" y="636" width="36" height="104" rx="18"/>
+    <rect x="494" y="596" width="36" height="144" rx="18"/>
+    <rect x="570" y="656" width="36" height="84" rx="18"/>
+  </g>
+</svg>

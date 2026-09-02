@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none" role="img" aria-label="SmartCura mark">
+  <title>SmartCura mark — heart and ECG pulse</title>
+  <!--
+    SmartCura master mark.
+    Heart = care (cura). ECG pulse = live, connected intelligence (smart).
+    The pulse passes cleanly through the heart's open band — monitoring that never interrupts care.
+    Brand colors: heart #2563EB (Medical Blue), pulse #06B6D4 (cyan, use #67E8F9 on dark surfaces).
+    Geometry is authored on a 1024 grid; stroke weights 54–62 (5–6% of canvas) for premium refinement.
+  -->
+  <g stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- heart: upper left lobe -->
+    <path d="M496 386 C470 268 330 238 268 330 C234 380 232 436 252 484" stroke="#2563EB" stroke-width="62"/>
+    <!-- heart: upper right lobe -->
+    <path d="M528 386 C554 268 694 238 756 330 C790 380 792 436 772 484" stroke="#2563EB" stroke-width="62"/>
+    <!-- heart: lower point -->
+    <path d="M292 596 C356 690 440 762 512 812 C584 762 668 690 732 596" stroke="#2563EB" stroke-width="62"/>
+    <!-- ECG: flat, Q dip, R spike, S dip, recovery, T wave, flat -->
+    <path d="M132 540 H372 L396 562 L452 330 L508 678 L556 540 H586 C600 472 648 472 662 540 H892" stroke="#06B6D4" stroke-width="54"/>
+  </g>
+</svg>

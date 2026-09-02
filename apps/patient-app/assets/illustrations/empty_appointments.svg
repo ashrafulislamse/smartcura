@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" role="img" aria-label="No appointments">
+  <title>No appointments illustration</title>
+  <rect x="28" y="26" width="64" height="60" rx="8" stroke="#2563EB" stroke-width="3"/>
+  <path d="M28 40h64" stroke="#2563EB" stroke-width="3"/>
+  <path d="M44 26v14" stroke="#2563EB" stroke-width="3" stroke-linecap="round"/>
+  <path d="M76 26v14" stroke="#2563EB" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="60" cy="66" r="14" stroke="#06B6D4" stroke-width="3"/>
+  <path d="M60 58v8l6 4" stroke="#06B6D4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M24 100h18l8-6 8 10 8-8 8 4h22" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 820" fill="none" role="img" aria-label="SmartCura logo">
+  <title>SmartCura — stacked logo with tagline</title>
+  <!-- Stacked lockup for splash screens, pitch decks, app-store banners. -->
+  <g transform="translate(194 30) scale(0.5)" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M496 386 C470 268 330 238 268 330 C234 380 232 436 252 484" stroke="#2563EB" stroke-width="62"/>
+    <path d="M528 386 C554 268 694 238 756 330 C790 380 792 436 772 484" stroke="#2563EB" stroke-width="62"/>
+    <path d="M292 596 C356 690 440 762 512 812 C584 762 668 690 732 596" stroke="#2563EB" stroke-width="62"/>
+    <path d="M132 540 H372 L396 562 L452 330 L508 678 L556 540 H586 C600 472 648 472 662 540 H892" stroke="#06B6D4" stroke-width="54"/>
+  </g>
+  <text x="450" y="600" text-anchor="middle" font-family="Inter, Poppins, 'Segoe UI', system-ui, -apple-system, sans-serif" font-size="128" font-weight="700" letter-spacing="-2.5">
+    <tspan fill="#0F172A">Smart</tspan><tspan fill="#2563EB">Cura</tspan>
+  </text>
+  <text x="450" y="690" text-anchor="middle" font-family="Inter, Poppins, 'Segoe UI', system-ui, -apple-system, sans-serif" font-size="33" font-weight="600" letter-spacing="5" fill="#64748B">INTEGRATED SMART HEALTHCARE</text>
+</svg>

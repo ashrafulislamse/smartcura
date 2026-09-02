@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Google Maps Android API key.
+
+        Replace the placeholder value below with a real API key obtained from the
+        Google Cloud Console (https://console.cloud.google.com/google/maps-apis/credentials).
+
+        Steps:
+          1. Create a project (or reuse the SmartCura project) in Google Cloud Console.
+          2. Enable the "Maps SDK for Android" API.
+          3. Create an API key and restrict it to the Android app (package name +
+             SHA-1 fingerprint) for production safety.
+          4. Paste the key as the value of GOOGLE_MAPS_API_KEY below.
+
+        While the placeholder is in place the GoogleMap widget will render an empty
+        grid/blank surface; this is acceptable for the FYP demo but no tiles or
+        markers will be visible until a real key is supplied.
+
+        Do NOT commit a real production key to the repository. For the demo key,
+        keep it restricted by Android app package name + SHA-1.
+    -->
+    <!-- Replace YOUR_GOOGLE_MAPS_API_KEY_HERE with a real Maps SDK for Android key. -->
+    <string name="GOOGLE_MAPS_API_KEY">YOUR_GOOGLE_MAPS_API_KEY_HERE</string>
+</resources>

@@ -1,0 +1,232 @@
+# Standalone production stack for the SmartCura backend.
+#
+# This stack uses Caddy for TLS and routing, and includes every dependency the backend
+# requires in NODE_ENV=production. You MUST supply real providers:
+#   - Firebase project for identity
+#   - Cloudflare R2 bucket for object storage
+#   - LiveKit for video
+#   - OpenAI-compatible LLM for AI clinical support (OpenAI, OpenRouter, Groq, etc.)
+#   - ClamAV for malware scanning
+#
+# FYP demo note: payment and push are intentionally simulated in this stack. No real
+# money is charged and no real push notifications are sent. The worker logs a warning
+# at startup. Replace SMARTCURA_PAYMENT_PROVIDER and SMARTCURA_PUSH_PROVIDER when you
+# add a real gateway and FCM adapter.
+#
+# Copy .env.example to .env, fill in production values, then run:
+#   ./deploy.sh
+name: smartcura-prod
+
+services:
+  postgres:
+    image: postgres:18.4-alpine3.23@sha256:6ae038add203ffd3e33c20dfff45f6d714afa194facbf0f533b9204cb63cc5ef
+    environment:
+      POSTGRES_DB: smartcura
+      POSTGRES_USER: smartcura
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U smartcura -d smartcura']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  mosquitto:
+    # Custom image: see deploy/mosquitto/Dockerfile. The config and ACL are baked
+    # in; the password file is generated at runtime from SMARTCURA_MQTT_PASSWORD.
+    # This avoids bind-mount shadowing and the musl EAI_AGAIN listener bug (fixed
+    # by binding to 0.0.0.0 in mosquitto.conf).
+    build:
+      context: deploy/mosquitto
+      dockerfile: Dockerfile
+    environment:
+      SMARTCURA_MQTT_PASSWORD: ${SMARTCURA_MQTT_PASSWORD:?MQTT bridge password required}
+    volumes:
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_logs:/mosquitto/log
+    ports:
+      # Bind to all interfaces so ESP32 devices on the LAN can connect.
+      # For public-internet access, put mosquitto behind a TLS-terminating proxy
+      # (port 8883 with certificates) instead of exposing 1883 directly.
+      - '1883:1883'
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  clamav:
+    image: clamav/clamav:latest
+    volumes:
+      - clamav_data:/var/lib/clamav
+    # ClamAV needs a moment to download the signature database on first boot.
+    healthcheck:
+      test: ['CMD', 'clamdscan', '--ping', '1']
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 120s
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      SMARTCURA_BUILD_VERSION: ${SMARTCURA_BUILD_VERSION:-0.1.0}
+      SMARTCURA_API_HOST: 0.0.0.0
+      SMARTCURA_API_PORT: 3000
+      SMARTCURA_API_ALLOWED_ORIGINS: ${SMARTCURA_API_ALLOWED_ORIGINS:?allowed origins required}
+      SMARTCURA_SESSION_CSRF_SECRET: ${SMARTCURA_SESSION_CSRF_SECRET:?CSRF secret required}
+      DATABASE_URL: postgresql://smartcura:${POSTGRES_PASSWORD}@postgres:5432/smartcura?sslmode=disable
+      SMARTCURA_IDENTITY_ADAPTER: firebase
+      SMARTCURA_FIREBASE_PROJECT_ID: ${SMARTCURA_FIREBASE_PROJECT_ID:?Firebase project ID required}
+      SMARTCURA_VIDEO_ADAPTER: livekit
+      SMARTCURA_LIVEKIT_URL: ${SMARTCURA_LIVEKIT_URL:?LiveKit URL required}
+      SMARTCURA_LIVEKIT_API_KEY: ${SMARTCURA_LIVEKIT_API_KEY:?LiveKit API key required}
+      SMARTCURA_LIVEKIT_API_SECRET: ${SMARTCURA_LIVEKIT_API_SECRET:?LiveKit API secret required}
+      SMARTCURA_PUSH_TOKEN_ENCRYPTION_KEY: ${SMARTCURA_PUSH_TOKEN_ENCRYPTION_KEY:?push token encryption key required}
+      # Redis for the WebSocket chat gateway and the per-route rate limiter.
+      # Points at the redis service on the internal Docker network. The
+      # throttler uses this for its Redis-backed storage so rate limits are
+      # shared across API instances; the chat gateway uses it for pub/sub.
+      SMARTCURA_REDIS_URL: redis://redis:6379
+      SMARTCURA_AI_PROVIDER: openai
+      SMARTCURA_AI_API_KEY: ${SMARTCURA_AI_API_KEY:?AI API key required}
+      SMARTCURA_AI_BASE_URL: ${SMARTCURA_AI_BASE_URL:-https://api.openai.com/v1}
+      SMARTCURA_AI_MODEL: ${SMARTCURA_AI_MODEL:-gpt-4o-mini}
+      SMARTCURA_OBJECT_STORAGE_PROVIDER: r2
+      SMARTCURA_R2_ACCOUNT_ID: ${SMARTCURA_R2_ACCOUNT_ID:?R2 account ID required}
+      SMARTCURA_R2_BUCKET: ${SMARTCURA_R2_BUCKET:?R2 bucket required}
+      SMARTCURA_R2_ENDPOINT: ${SMARTCURA_R2_ENDPOINT:?R2 endpoint required}
+      SMARTCURA_R2_ACCESS_KEY_ID: ${SMARTCURA_R2_ACCESS_KEY_ID:?R2 access key required}
+      SMARTCURA_R2_SECRET_ACCESS_KEY: ${SMARTCURA_R2_SECRET_ACCESS_KEY:?R2 secret key required}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "--eval", "fetch('http://localhost:3000/api/v1/health').then(r => r.ok ? process.exit(0) : process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      SMARTCURA_BUILD_VERSION: ${SMARTCURA_BUILD_VERSION:-0.1.0}
+      DATABASE_URL: postgresql://smartcura:${POSTGRES_PASSWORD}@postgres:5432/smartcura?sslmode=disable
+      SMARTCURA_WORKER_POLL_INTERVAL_MS: ${SMARTCURA_WORKER_POLL_INTERVAL_MS:-5000}
+      SMARTCURA_WORKER_LEASE_MS: ${SMARTCURA_WORKER_LEASE_MS:-30000}
+      SMARTCURA_WORKER_BATCH_SIZE: ${SMARTCURA_WORKER_BATCH_SIZE:-10}
+      SMARTCURA_WORKER_MAX_ATTEMPTS: ${SMARTCURA_WORKER_MAX_ATTEMPTS:-10}
+      SMARTCURA_MALWARE_SCANNER: clamav
+      SMARTCURA_CLAMAV_HOST: clamav
+      SMARTCURA_CLAMAV_PORT: 3310
+      SMARTCURA_PAYMENT_PROVIDER: deterministic
+      # Env-substituted so a real provider can be enabled without editing the
+      # compose file; the default keeps the FYP demo bootable with no secrets.
+      SMARTCURA_PUSH_PROVIDER: ${SMARTCURA_PUSH_PROVIDER:-deterministic}
+      SMARTCURA_EMAIL_PROVIDER: ${SMARTCURA_EMAIL_PROVIDER:-deterministic}
+      # The worker must unseal FCM tokens with the SAME key the API sealed them
+      # with; omitting it here made every push fail token_decrypt_error.
+      SMARTCURA_PUSH_TOKEN_ENCRYPTION_KEY: ${SMARTCURA_PUSH_TOKEN_ENCRYPTION_KEY:-0000000000000000000000000000000000000000000000000000000000000000}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL:-}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY:-}
+      # Hostinger Email SMTP (SMARTCURA_EMAIL_PROVIDER=smtp).
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_SECURE: ${SMTP_SECURE:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-}
+      SMARTCURA_AI_PROVIDER: openai
+      SMARTCURA_AI_API_KEY: ${SMARTCURA_AI_API_KEY:?AI API key required}
+      SMARTCURA_AI_BASE_URL: ${SMARTCURA_AI_BASE_URL:-https://api.openai.com/v1}
+      SMARTCURA_AI_MODEL: ${SMARTCURA_AI_MODEL:-gpt-4o-mini}
+      SMARTCURA_OBJECT_STORAGE_PROVIDER: r2
+      SMARTCURA_R2_ACCOUNT_ID: ${SMARTCURA_R2_ACCOUNT_ID}
+      SMARTCURA_R2_BUCKET: ${SMARTCURA_R2_BUCKET}
+      SMARTCURA_R2_ENDPOINT: ${SMARTCURA_R2_ENDPOINT}
+      SMARTCURA_R2_ACCESS_KEY_ID: ${SMARTCURA_R2_ACCESS_KEY_ID}
+      SMARTCURA_R2_SECRET_ACCESS_KEY: ${SMARTCURA_R2_SECRET_ACCESS_KEY}
+      # MQTT vitals ingestion bridge. Connects to the mosquitto service on the
+      # internal Docker network.
+      SMARTCURA_MQTT_URL: ${SMARTCURA_MQTT_URL:-mqtt://mosquitto:1883}
+      SMARTCURA_MQTT_USERNAME: ${SMARTCURA_MQTT_USERNAME:-smartcura-bridge}
+      SMARTCURA_MQTT_PASSWORD: ${SMARTCURA_MQTT_PASSWORD:?MQTT bridge password required}
+      SMARTCURA_MQTT_CLIENT_ID: ${SMARTCURA_MQTT_CLIENT_ID:-smartcura-worker}
+    command: node apps/worker/dist/main.js
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clamav:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN is required}
+      ACME_EMAIL: ${ACME_EMAIL:?ACME_EMAIL is required}
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - smartcura
+
+volumes:
+  postgres_data:
+  redis_data:
+  mosquitto_data:
+  mosquitto_logs:
+  clamav_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  smartcura:
+    driver: bridge

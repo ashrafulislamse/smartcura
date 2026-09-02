@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Branded splash: patient-blue gradient tile with the white SmartCura mark centered. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:startColor="#3B82F6"
+                android:endColor="#1E3A8A"
+                android:type="linear" />
+        </shape>
+    </item>
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/launch_logo" />
+    </item>
+</layer-list>
