@@ -75,10 +75,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multi-patient monitoring dashboard
 
 ### Planned - Phase 3: AI Integration (10 screens)
-- AI diagnosis assistant
-- Clinical decision support
-- Treatment recommendations
-- Risk prediction models
+- AI artifacts viewer + assistant — non-diagnostic by design
+- Structured, source-cited symptom summaries and trend analysis
+- Vitals risk scoring and anomaly detection as AI context (no diagnosis, no treatment recommendations)
+- Clinician review required for all AI output
 - Practice analytics
 
 ### Planned - Phase 4: Advanced Features (5 screens)
@@ -105,4 +105,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-**Note:** Version 1.0.0 records completion of the 22-screen UI milestone. Backend persistence, Firebase identity, LiveKit media connectivity and production hardening are not yet implemented.
+**Note:** Version 1.0.0 records completion of the 22-screen UI milestone. The backend integration, Firebase identity and LiveKit media connectivity planned above were subsequently implemented within the Final Year Project scope; see the [root README](../../README.md) for the current feature set and status.

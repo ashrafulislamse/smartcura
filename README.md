@@ -153,7 +153,7 @@ smartcura/
 ├── iot-firmware/       # ESP32 firmware, wiring, test sketches, flash scripts
 ├── tools/              # Measurement, seed and deploy helpers
 ├── ENVIRONMENT.md      # Every env var: where to get it and why it exists
-└── LICENSE             # MIT + academic and medical notices
+└── LICENSE             # MIT
 ```
 
 ## 🚀 Getting started
