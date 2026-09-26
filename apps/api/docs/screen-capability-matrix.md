@@ -7,6 +7,8 @@
 
 This is source-derived requirements evidence for `WP-01`; it is not an endpoint specification. OpenAPI and AsyncAPI must normalize the conflicts recorded below rather than copying client mock shapes.
 
+> **Status update (September 2026):** This matrix is the 26 July 2026 Stage-0A baseline and is kept as requirements evidence only. Every migration-state cell reads `mock` because it was captured before any client used the real API. The platform has since implemented the backend end to end, and the AI layer is live and non-diagnostic by design — it summarises patient-reported symptoms with cited sources, never diagnoses or changes medication, and clinician review is required. Current behaviour is documented in the [root README](../../../README.md).
+
 ## 1. Baseline and repository safety
 
 | Client | Verification | Result | Interpretation |
