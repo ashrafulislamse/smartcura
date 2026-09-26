@@ -317,5 +317,11 @@ Built as a Final Year Project at **City University Malaysia**, supervised by
 
 ## 📄 License
 
-Released under the [MIT License](LICENSE) with additional academic and medical
-notices — read both before reusing any part of this project.
+Released under the [MIT License](LICENSE).
+
+Additional notices: this project was developed as a Final Year Project at
+**City University Malaysia**. It is an educational prototype built for
+academic evaluation — it demonstrates software engineering principles,
+system architecture and full-stack development capabilities, and it is
+**not** a medical device. Read the [medical disclaimer](#medical-disclaimer)
+before reusing any part of this project.
