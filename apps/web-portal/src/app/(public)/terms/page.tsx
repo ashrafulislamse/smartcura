@@ -58,8 +58,8 @@ export default function TermsPage() {
         <p className="mt-4 text-[length:var(--text-2)] text-[var(--color-ink-2)]">
           This site and the platform it documents are provided as-is, on a
           prototype basis, without warranty of any kind. Service availability,
-          data accuracy, and clinical safety are explicitly outside the FYP
-          scope. The disclaimers on the home page, in the footer, and on{" "}
+          data accuracy, and clinical safety are explicitly outside the current
+          product scope. The disclaimers on the home page, in the footer, and on{" "}
           <Link href="/medical-disclaimer" className="font-medium text-[var(--color-brand-blue)] underline-offset-4 hover:underline">the medical disclaimer page</Link>{" "}
           apply to every artefact shown.
         </p>

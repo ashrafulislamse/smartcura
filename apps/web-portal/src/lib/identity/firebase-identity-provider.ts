@@ -184,7 +184,7 @@ export class FirebaseIdentityProvider implements IdentityProvider {
    *
    * If an `otp` is supplied, it is treated as a TOTP second factor. The
    * standard Firebase pattern is `signInWithEmailAndPassword` then resolve the
-   * enrolled TOTP multi-factor hint; the FYP demo's TOTP is optional per the
+   * enrolled TOTP multi-factor hint; the demo's TOTP is optional per the
    * backend role policy, so the password path is the one that fires here.
    */
   async reauthenticate(options?: ReauthenticateOptions): Promise<string> {

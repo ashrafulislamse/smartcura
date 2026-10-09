@@ -31,7 +31,7 @@ export default function MedicalDisclaimerPage() {
 
       <article className="mx-auto max-w-[760px] px-6 py-12 md:py-20 text-[length:var(--text-2)] text-[var(--color-ink)] bg-[var(--color-paper)]">
         <p className="rounded-xl border border-[var(--color-critical)]/40 bg-[var(--color-critical)]/8 p-5 font-medium text-[var(--color-ink)]">
-          SmartCura is a final-year university prototype. It operates on
+          SmartCura is an early-stage platform prototype. It operates on
           synthetic data only and is not a medical device. It must not be
           relied on for clinical decisions, emergency response, or real
           patient care.
@@ -76,7 +76,7 @@ export default function MedicalDisclaimerPage() {
         <p className="mt-4 text-[length:var(--text-2)] text-[var(--color-ink-2)]">
           Promoting this prototype into a real clinical product requires
           engineering, clinical, privacy, security, and regulatory work that
-          intentionally sits outside the FYP scope — including, but not
+          intentionally sits outside the current product scope — including, but not
           limited to: ISO 13485 quality system establishment, IEC 62304
           software lifecycle conformance, MDR / FDA QSR submission, clinical
           trials, validated deployment, regulated-data hosting, and an

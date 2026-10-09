@@ -9,7 +9,7 @@ const STATIONS: ReadonlyArray<{ id: string; label: string; one_liner: string }> 
   { id: "body", label: "Body", one_liner: "MAX30102 on the DOIT DevKit V1, Health Connect on the phone." },
   { id: "edge", label: "Edge", one_liner: "BLE provisioning, NVS-persisted WiFi, OLED that shows what's happening." },
   { id: "transport", label: "Transport", one_liner: "MQTT-over-WSS to mqtt.smartcura.app, per-device credentials, UCUM units." },
-  { id: "platform", label: "Platform", one_liner: "NestJS API + worker, PostgreSQL 18, transactional outbox, 62 migrations." },
+  { id: "platform", label: "Platform", one_liner: `NestJS API + worker, PostgreSQL 18, transactional outbox, ${MEASURED.migrations} migrations.` },
   { id: "intelligence", label: "Intelligence", one_liner: "Health context · risk · anomaly · longitudinal → Fireworks Kimi K3." },
   { id: "care", label: "Care", one_liner: "Doctor alerts, LiveKit video, e-prescription, pharmacy, dispatch, SOS." },
 ];
@@ -65,7 +65,7 @@ const SURFACES: ReadonlyArray<{
     href: "/apps#portal",
     roleColor: "var(--color-role-portal)",
     features: [
-      "68 authenticated pages",
+      `${MEASURED.portalPages} authenticated pages`,
       "Appointments · pharmacy · emergency",
       "Devices · verification · roles",
       "Notifications inbox",
@@ -89,57 +89,66 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Hero — night band, marquee shape: the canvas + headline fills the fold. */}
+      {/* Hero — night band, centered statement shape: badge, gradient-accent
+          headline, two CTAs, then a glowing telemetry panel with a mono trust
+          row of measured numbers. The canvas island draws a simulated ECG. */}
       <section
         aria-labelledby="hero-heading"
         className="relative isolate overflow-hidden bg-[var(--color-night)] text-[var(--color-ink-inverse)]"
       >
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[var(--color-night)] via-[var(--color-night-deep)] to-[var(--color-night-edge)]" />
-        <div className="mx-auto max-w-[1180px] px-6 pb-16 pt-10 md:pb-24 md:pt-16">
-          <div className="grid items-end gap-10 md:grid-cols-[1.05fr_0.95fr]">
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--color-pulse-night)]/80">
-                Final-year project · measured {MEASURED_AT}
-              </p>
-              <h1
-                id="hero-heading"
-                className="mt-4 font-display text-[length:var(--text-display)] font-semibold leading-[1.04] tracking-[-0.02em] text-[var(--color-ink-inverse)]"
+        <div
+          aria-hidden
+          className="absolute left-1/2 top-[58%] -z-10 h-[380px] w-[720px] max-w-none -translate-x-1/2 rounded-full bg-[var(--color-pulse-night)]/10 blur-[110px]"
+        />
+        <div className="mx-auto max-w-[1180px] px-6 pb-16 pt-12 md:pb-24 md:pt-20">
+          <div className="mx-auto flex max-w-[880px] flex-col items-center text-center">
+            <p className="inline-flex items-center gap-2 rounded-full border border-[var(--color-pulse-night)]/25 bg-[var(--color-pulse-night)]/10 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-pulse-night)]">
+              Early-stage platform · measured {MEASURED_AT}
+            </p>
+            <h1
+              id="hero-heading"
+              className="mt-7 font-display text-[length:var(--text-display)] font-semibold leading-[1.05] tracking-[-0.02em] text-[var(--color-ink-inverse)]"
+            >
+              Care, watched over by{" "}
+              <span className="bg-gradient-to-r from-[var(--color-pulse-night)] to-[var(--color-brand-blue)] bg-clip-text text-transparent">
+                intelligence
+              </span>
+              .
+            </h1>
+            <p className="mt-6 max-w-[62ch] text-[length:var(--text-3)] leading-relaxed text-[var(--color-ink-inverse)]/85">
+              An end-to-end IoT + AI telehealth prototype: real vitals from a sensor,
+              structured summaries from an AI, and a care team to receive it. Verified
+              on a live VPS — synthetic data only.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/how-it-works"
+                className="group inline-flex items-center justify-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-5 py-3 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--color-brand-blue-strong)] focus-visible:outline-none focus-visible:[outline:var(--focus-ring)] focus-visible:[outline-offset:2px]"
               >
-                Care, watched over by intelligence.
-              </h1>
-              <p className="mt-6 max-w-[58ch] text-[length:var(--text-3)] leading-relaxed text-[var(--color-ink-inverse)]/85">
-                An end-to-end IoT + AI telehealth prototype: real vitals from a sensor,
-                structured summaries from an AI, and a care team to receive it. Verified
-                on a live VPS — synthetic data only.
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href="/how-it-works"
-                  className="group inline-flex items-center justify-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-5 py-3 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--color-brand-blue-strong)] focus-visible:outline-none focus-visible:[outline:var(--focus-ring)] focus-visible:[outline-offset:2px]"
-                >
-                  How it works <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
-                </Link>
-                <Link
-                  href="/demo"
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--color-ink-inverse)]/30 px-5 py-3 text-[15px] font-semibold text-[var(--color-ink-inverse)]/95 transition-colors hover:border-[var(--color-pulse-night)] hover:text-[var(--color-pulse-night)] focus-visible:outline-none focus-visible:[outline:var(--focus-ring)] focus-visible:[outline-offset:2px]"
-                >
-                  Try the demo
-                </Link>
-              </div>
-              <p className="mt-6 font-mono text-[12px] text-[var(--color-ink-inverse)]/55">
-                <span aria-hidden>◆</span> SmartCura · Not a medical device
-              </p>
+                How it works <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
+              </Link>
+              <Link
+                href="/demo"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--color-ink-inverse)]/30 px-5 py-3 text-[15px] font-semibold text-[var(--color-ink-inverse)]/95 transition-colors hover:border-[var(--color-pulse-night)] hover:text-[var(--color-pulse-night)] focus-visible:outline-none focus-visible:[outline:var(--focus-ring)] focus-visible:[outline-offset:2px]"
+              >
+                Try the demo
+              </Link>
             </div>
+          </div>
 
-            <div>
-              <Suspense fallback={<div className="h-[220px]" aria-hidden />}>
-                <TelemetryCanvas
-                  caption="Simulated telemetry — prototype firmware. Not a real patient."
-                  bpm={72}
-                  spO2={98}
-                />
-              </Suspense>
-            </div>
+          <div className="mx-auto mt-12 max-w-[980px] md:mt-16">
+            <Suspense fallback={<div className="h-[220px]" aria-hidden />}>
+              <TelemetryCanvas
+                caption="Simulated telemetry — prototype firmware. Not a real patient. Not a medical device."
+                bpm={72}
+                spO2={98}
+              />
+            </Suspense>
+            <p className="mt-6 text-center font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--color-ink-inverse)]/55">
+              {MEASURED.restOperations} REST ops · {MEASURED.migrations} migrations ·{" "}
+              {MEASURED.localTests} tests green · synthetic data only
+            </p>
           </div>
         </div>
       </section>
@@ -168,7 +177,7 @@ export default function HomePage() {
             {STATIONS.map((station, idx) => (
               <li
                 key={station.id}
-                className="relative rounded-xl border border-[var(--rule-hairline)] bg-white p-4"
+                className="public-lift relative rounded-xl border border-[var(--rule-hairline)] bg-white p-4 hover:border-[var(--rule-strong)] hover:shadow-[0_10px_30px_-14px_rgba(15,23,42,0.2)]"
               >
                 <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-3)]">
                   0{idx + 1}
@@ -208,13 +217,8 @@ export default function HomePage() {
             {SURFACES.map((s) => (
               <li
                 key={s.label}
-                className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-[var(--rule-hairline)] bg-[var(--color-paper)] transition-shadow hover:shadow-[0_10px_30px_-12px_rgba(15,23,42,0.18)]"
+                className="public-lift group relative flex h-full flex-col overflow-hidden rounded-xl border border-[var(--rule-hairline)] bg-[var(--color-paper)] hover:border-[var(--rule-strong)] hover:shadow-[0_12px_34px_-14px_rgba(15,23,42,0.2)]"
               >
-                <span
-                  aria-hidden
-                  className="absolute inset-y-0 left-0 w-[3px]"
-                  style={{ backgroundColor: s.roleColor }}
-                />
                 <div className="flex items-center justify-between gap-2 px-5 pt-5">
                   <div className="flex items-center gap-2">
                     <span
@@ -272,12 +276,12 @@ export default function HomePage() {
             {STATS.map((s) => (
               <li
                 key={s.label}
-                className="rounded-xl border border-[var(--rule-hairline)] bg-white px-4 py-5"
+                className="public-lift rounded-xl border border-[var(--rule-hairline)] bg-white px-4 py-5 hover:border-[var(--rule-strong)] hover:shadow-[0_10px_30px_-14px_rgba(15,23,42,0.18)]"
               >
                 <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink-3)]">
                   {s.label}
                 </p>
-                <p className="mt-1 font-mono text-[28px] font-semibold leading-none tabular-nums text-[var(--color-ink)]">
+                <p className="mt-2 font-mono text-[32px] font-semibold leading-none tabular-nums text-[var(--color-ink)] md:text-[34px]">
                   <CountUp to={s.value} />
                   {s.suffix ? <span className="ml-0.5 text-[14px] text-[var(--color-ink-3)]">{s.suffix}</span> : null}
                 </p>

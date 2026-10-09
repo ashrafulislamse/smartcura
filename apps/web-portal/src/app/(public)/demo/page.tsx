@@ -29,31 +29,31 @@ const LIVE_LINKS: ReadonlyArray<{ label: string; href: string; note: string; whe
   },
 ];
 
+const REPO = "https://github.com/ashrafulislamse/smartcura";
+
+// Every href below was curl-verified as a 200 on the public repo before this
+// list shipped. Internal working docs (QUICK_REFERENCE, STATUS, AGENTS, the
+// implementation plan) live only in the private tree — never link them here.
 const READING_LIST: ReadonlyArray<{ label: string; href: string; description: string }> = [
   {
-    label: "Starting point — docs/QUICK_REFERENCE.md",
-    href: "/QUICK_REFERENCE.md",
-    description: "Source-verified project state. What was measured, what is open.",
+    label: "Start here — README.md",
+    href: `${REPO}/blob/main/README.md`,
+    description: "What the platform is, what it honestly is not, and how everything runs.",
   },
   {
-    label: "Architectural intent — docs/04_TECHNICAL_SPECIFICATIONS/Backend_Implementation_Plan.md",
-    href: "/Backend_Implementation_Plan.md",
-    description: "34–46 week plan with the FYP core first. Append-only log of every verification, dated.",
+    label: "What shipped — CHANGELOG.md",
+    href: `${REPO}/blob/main/CHANGELOG.md`,
+    description: "Every change that reached main, in order — the project's own history.",
   },
   {
-    label: "Status snapshot — docs/STATUS.md",
-    href: "/STATUS.md",
-    description: "Generated. Never edited by hand. Match-and-trust-the-generator.",
+    label: "Where it goes — docs/ROADMAP.md",
+    href: `${REPO}/blob/main/docs/ROADMAP.md`,
+    description: "What is done, what is deferred, and what is deliberately not built yet.",
   },
   {
-    label: "AI Master Plan — docs/AI_MASTER_PLAN.md",
-    href: "/AI_MASTER_PLAN.md",
-    description: "Ten AI phases, ports, dates, and what's out of FYP scope.",
-  },
-  {
-    label: "Trap log — AGENTS.md",
-    href: "/AGENTS.md",
-    description: "Every wasted round-trip is documented here. Read it before you trust a check.",
+    label: "Evidence map — apps/api/docs/screen-capability-matrix.md",
+    href: `${REPO}/blob/main/apps/api/docs/screen-capability-matrix.md`,
+    description: "The dated capability baseline: every screen mapped to its real API work.",
   },
 ];
 
@@ -68,7 +68,7 @@ const TOUR: ReadonlyArray<{ idx: string; role: string; action: string }> = [
 export const metadata = {
   title: "Try the demo",
   description:
-    "A live, index-first landing page for stepping into the SmartCura prototype — portal login, API health, artefact reading order, and a five-minute end-to-end tour.",
+    "A live, index-first landing page for stepping into the SmartCura prototype — portal login, API health, artifact reading order, and a five-minute end-to-end tour.",
 };
 
 export default function DemoPage() {
@@ -192,13 +192,13 @@ export default function DemoPage() {
               id="read-h"
               className="mt-3 text-[length:var(--text-4)] font-semibold tracking-[-0.005em] text-[var(--color-ink)]"
             >
-              Five documents, ordered.
+              Four documents, ordered.
             </h2>
           </header>
 
           <ol className="mt-8 divide-y divide-[var(--rule-hairline)] overflow-hidden rounded-xl border border-[var(--rule-hairline)] bg-white">
             {READING_LIST.map((r, idx) => (
-              <li key={r.label + idx} className="grid gap-3 px-5 py-5 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] md:items-start">
+              <li key={r.label + idx} className="grid gap-3 px-5 py-5 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_auto] md:items-center">
                 <div>
                   <p className="font-mono text-[12px] uppercase tracking-[0.2em] text-[var(--color-ink-3)]">
                     0{idx + 1}
@@ -206,6 +206,14 @@ export default function DemoPage() {
                   <p className="mt-1 text-[14px] font-semibold text-[var(--color-ink)]">{r.label}</p>
                 </div>
                 <p className="text-[14px] text-[var(--color-ink-2)]">{r.description}</p>
+                <a
+                  href={r.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--rule-strong)] px-4 py-2 text-[13px] font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-brand-blue)] hover:text-[var(--color-brand-blue)] focus-visible:outline-none focus-visible:[outline:var(--focus-ring)] focus-visible:[outline-offset:2px]"
+                >
+                  Open <span aria-hidden>↗</span>
+                </a>
               </li>
             ))}
           </ol>

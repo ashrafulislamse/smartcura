@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MEASURED } from "@/lib/site-data";
 import { PulseDivider } from "@/components/public/pulse-divider";
 import { SystemMap } from "@/components/public/system-map";
 
@@ -60,8 +61,7 @@ const STATIONS: ReadonlyArray<Station> = [
     id: "platform",
     title: "Platform — the API + worker",
     one_liner: "NestJS, PostgreSQL 18, transactional outbox, Zod-validated contracts.",
-    details:
-      "246 REST operations, 62 migrations, 421 OpenAPI schemas, all regenerated to TypeScript and Dart contracts. Every state-changing route declares @RequireCsrf; a dedicated test enforces the rule (the only exemption is POST /sessions, which mints the token a mutation would need). Sessions ride on a __Host-prefixed, SameSite=Strict cookie — the portal proxies the API same-origin so the cookie is accepted. The worker fires off transactional outbox events; if it crashes mid-process the API retries from the durable queue on next boot.",
+    details: `${MEASURED.restOperations} REST operations, ${MEASURED.migrations} migrations, ${MEASURED.openApiSchemas} OpenAPI schemas, all regenerated to TypeScript and Dart contracts. Every state-changing route declares @RequireCsrf; a dedicated test enforces the rule (the only exemption is POST /sessions, which mints the token a mutation would need). Sessions ride on a __Host-prefixed, SameSite=Strict cookie — the portal proxies the API same-origin so the cookie is accepted. The worker fires off transactional outbox events; if it crashes mid-process the API retries from the durable queue on next boot.`,
     evidence: [
       { label: "API entry", path: "apps/api/apps/api/src/main.ts" },
       { label: "Worker entry", path: "apps/api/apps/worker/src/main.ts" },
@@ -145,7 +145,7 @@ export default function HowItWorksPage() {
               <li
                 key={s.id}
                 id={s.id}
-                className={`grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] md:items-start ${idx % 2 === 1 ? "md:[&>*:first-child]:order-2" : ""}`}
+                className={`scroll-mt-28 grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] md:items-start ${idx % 2 === 1 ? "md:[&>*:first-child]:order-2" : ""}`}
               >
                 <div>
                   <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-brand-blue)]">
@@ -227,7 +227,7 @@ export default function HowItWorksPage() {
               </ul>
             </div>
             <div>
-              <h3 className="font-mono text-[12px] uppercase tracking-[0.2em] text-[var(--color-pulse-night)]/80">Out of FYP scope</h3>
+              <h3 className="font-mono text-[12px] uppercase tracking-[0.2em] text-[var(--color-pulse-night)]/80">On the roadmap</h3>
               <ul className="mt-3 space-y-2 text-[14px] text-[var(--color-ink-inverse)]/85">
                 <li>· AI-10 wearable expansion (smartwatches beyond Health Connect)</li>
                 <li>· Real Stripe payment adapter (deterministic stub by design)</li>

@@ -143,7 +143,7 @@ export default function AppsPage() {
               key={s.id}
               id={s.id}
               aria-labelledby={`surface-${s.id}-h2`}
-              className={sIdx > 0 ? "mt-20 md:mt-28" : ""}
+              className={sIdx > 0 ? "mt-20 scroll-mt-28 md:mt-28" : "scroll-mt-28"}
             >
               <header className="grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
                 <div>

@@ -90,7 +90,7 @@ export const metadata = {
 
 const ASIDE_NON_DIAGNOSTIC = {
   title: "Non-diagnostic by design.",
-  why: "It is a final-year prototype. The system carries no clinical claims:",
+  why: "It is an early-stage prototype. The system carries no clinical claims:",
   bullets: [
     "It does not diagnose.",
     "It does not recommend treatment.",

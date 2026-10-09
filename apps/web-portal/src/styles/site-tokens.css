@@ -105,3 +105,76 @@
     --dur-slow: 0ms;
   }
 }
+
+/* =====================================================================
+ * Public-site motion & selection — added in the professional-polish pass.
+ * ===================================================================== */
+
+/* The public layout root — smooth anchor scrolls (SystemMap stations, apps
+ * role anchors), guarded for reduced motion. */
+.public-root {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  .public-root {
+    scroll-behavior: auto;
+  }
+}
+
+/* Brand-tinted selection, both themes. */
+::selection {
+  background: var(--color-pulse-soft);
+  color: var(--color-ink);
+}
+
+/* Mobile nav sheet — rises and fades in once; items stagger behind it.
+ * Durations/easings come from the motion tokens above, so the reduced-motion
+ * token override zeroes them. `animation: none` is the belt-and-braces guard. */
+@keyframes public-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes public-sheet-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.public-sheet {
+  animation: public-sheet-in var(--dur-base) var(--ease-out) both;
+}
+.public-sheet-item {
+  animation: public-sheet-item-in var(--dur-base) var(--ease-out) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .public-sheet,
+  .public-sheet-item {
+    animation: none;
+  }
+}
+
+/* Hover-lift for cards on the public pages (transform + shadow, one token
+ * duration, reduced-motion-safe because the token zeroes out to instant). */
+.public-lift {
+  transition: transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.public-lift:hover {
+  transform: translateY(-3px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .public-lift:hover {
+    transform: none;
+  }
+}

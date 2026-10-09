@@ -56,7 +56,7 @@ export default function PrivacyPage() {
         </h2>
         <p className="mt-4 text-[length:var(--text-2)] text-[var(--color-ink-2)]">
           Every screenshot on this site shows a real, deployed build of the
-          system operating on synthetic data. The AI assistant artifcat shown on {" "}
+          system operating on synthetic data. The AI assistant artifact shown on {" "}
           <Link href="/ai" className="font-medium text-[var(--color-brand-blue)] underline-offset-4 hover:underline">the AI page</Link>{" "}
           is a structurally faithful demonstration with all patient
           identifiers demoted. The simulated ECG and SpO₂ values on the home
@@ -89,11 +89,11 @@ export default function PrivacyPage() {
           Limitations
         </h2>
         <p className="mt-4 text-[length:var(--text-2)] text-[var(--color-ink-2)]">
-          SmartCura is a final-year prototype. It is not a regulated medical
+          SmartCura is an early-stage prototype. It is not a regulated medical
           device and is not for clinical use. It operates on synthetic data
           only. Production deployment of these commitments still requires the
           engineering, clinical, privacy, security, and regulatory work that
-          intentionally sits outside the FYP scope.
+          intentionally sits outside the current product scope.
         </p>
       </article>
     </>

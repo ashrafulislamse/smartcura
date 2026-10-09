@@ -40,7 +40,7 @@ to [Semantic Versioning](https://semver.org/).
 
 ### Known limitations
 
-- Payments are a deterministic stub — out of FYP scope.
+- Payments are a deterministic stub — on the roadmap.
 - Three baseline k6 load scenarios were executed against the live deployment
   (100% success, p95 < 21 ms, rate limiting verified); the four
   contention/race scripts remain unexecuted.

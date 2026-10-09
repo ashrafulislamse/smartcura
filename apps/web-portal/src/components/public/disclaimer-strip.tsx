@@ -1,6 +1,6 @@
 /**
  * Medical disclaimer strip — rendered on every public page in the footer band.
- * Plain language, FYP-framed. The text mirrors AGENTS.md wording so the codebase
+ * Plain language, prototype-framed. The text mirrors AGENTS.md wording so the codebase
  * and the website say the same thing.
  */
 export function DisclaimerStrip({ compact = false }: { compact?: boolean }) {
@@ -19,7 +19,7 @@ export function DisclaimerStrip({ compact = false }: { compact?: boolean }) {
           Prototype · Synthetic data only
         </p>
         <p className="mt-1 max-w-[78ch] text-[var(--color-ink-inverse)]/80">
-          SmartCura is a final-year project prototype. The system runs on synthetic
+          SmartCura is an early-stage platform prototype. The system runs on synthetic
           patient data and uncalibrated prototype sensors. It is not a medical device
           and is not approved for diagnosis, treatment or any form of real patient
           care. AI-generated summaries are explicitly labelled

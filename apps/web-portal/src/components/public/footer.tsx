@@ -31,11 +31,17 @@ export function PublicFooter({ liveHrefs }: { liveHrefs: ReadonlyArray<LiveHref>
             <div>
               <SiteMark inverted />
               <p className="mt-4 max-w-[36ch] text-[var(--color-ink-inverse)]/85">
-                Final-year project · IoT + AI telehealth, verified end-to-end on the
-                live VPS — synthetic data only.
+                Early-stage platform · IoT + AI telehealth, verified end-to-end on
+                live infrastructure — synthetic data only.
               </p>
-              <p className="mt-4 font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-pulse-night)]/85">
-                <span aria-hidden>●</span> live demo verified {MEASURED_AT}
+              <p className="mt-5">
+                <span className="inline-flex items-center gap-2.5 rounded-full border border-[var(--color-ok)]/30 bg-[var(--color-ok)]/10 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--color-ink-inverse)]/90">
+                  <span aria-hidden className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-ok)] opacity-50" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--color-ok)]" />
+                  </span>
+                  live demo verified {MEASURED_AT}
+                </span>
               </p>
             </div>
 

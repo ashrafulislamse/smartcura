@@ -38,7 +38,7 @@
   <code>wss://mqtt.smartcura.app:9001/mqtt</code>
 </p>
 
-> ⚠️ **Prototype status — synthetic data only.** SmartCura is a Final Year Project.
+> ⚠️ **Prototype status — synthetic data only.** SmartCura is an early-stage health-technology platform.
 > The live demo runs on synthetic test data, the AI layer is non-diagnostic by design,
 > and nothing here is certified or clinically validated. Read the
 > [medical disclaimer](#medical-disclaimer) before anything else.
@@ -270,7 +270,7 @@ claims — the four contention/race scenarios remain unexecuted (see the
 | Flutter apps | 🟡 Source-complete, debug APKs build — on-device verification ongoing |
 | ESP32 firmware | ✅ Publishing live vitals (prototype sensor accuracy is limited) |
 | AI layer | ✅ Live, non-diagnostic, human-reviewed |
-| Payments | ⚠️ Deterministic stub — out of FYP scope |
+| Payments | ⚠️ Deterministic stub — on the roadmap |
 | Load / NFR tests | 🟡 3 baseline k6 scenarios executed live (100% success, p95 < 21 ms) · 4 contention scripts unexecuted — [results](apps/api/test/load/results/LOAD_TEST_RESULTS.md) |
 
 The patient-app CI workflow marks its steps `continue-on-error`, so treat its
@@ -296,8 +296,8 @@ badge as best-effort rather than proof.
 
 ## Medical disclaimer
 
-SmartCura is an **educational prototype** built for a Final Year Project. It
-runs on **synthetic data only** and uses non-certified prototype sensors.
+SmartCura is an **early-stage prototype**. It runs on **synthetic data only**
+and uses non-certified prototype sensors.
 
 It is **not** a medical device and has not been certified, validated or
 approved under ISO 13485, IEC 62304, the EU MDR, FDA QSR or any equivalent
@@ -307,7 +307,7 @@ non-diagnostic by design and its output requires clinician review.
 
 ## 🙏 Acknowledgements
 
-Built as a Final Year Project at **City University Malaysia**, supervised by
+SmartCura began at **City University Malaysia**, supervised by
 **Dr. Mohammad Kazem Chamran**.
 
 ## 👤 Author
@@ -319,9 +319,8 @@ Built as a Final Year Project at **City University Malaysia**, supervised by
 
 Released under the [MIT License](LICENSE).
 
-Additional notices: this project was developed as a Final Year Project at
-**City University Malaysia**. It is an educational prototype built for
-academic evaluation — it demonstrates software engineering principles,
-system architecture and full-stack development capabilities, and it is
-**not** a medical device. Read the [medical disclaimer](#medical-disclaimer)
+Additional notices: this project began development at **City University
+Malaysia**. It is an early-stage prototype — it demonstrates software
+engineering, system architecture and full-stack development capability, and it
+is **not** a medical device. Read the [medical disclaimer](#medical-disclaimer)
 before reusing any part of this project.

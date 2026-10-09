@@ -82,7 +82,7 @@ provider has a deterministic mock.
 ## Reliability boundary
 
 One VPS is a single point of failure for API, database and media — acceptable
-for the FYP prototype, not for production clinical use. Anything beyond the
+for the current prototype, not for production clinical use. Anything beyond the
 demo needs daily provider snapshots plus encrypted independent backups.
 
 Synthetic data and prototype sensors only — see the medical disclaimer in the

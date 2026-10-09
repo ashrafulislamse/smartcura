@@ -18,13 +18,14 @@ export const metadata: Metadata = {
     template: "%s · SmartCura",
   },
   description:
-    "SmartCura is a final-year project prototype: ESP32 vitals monitoring, an AI health-summary pipeline, video consultations, e-prescriptions, pharmacy delivery and emergency response — verified end-to-end on a live VPS, on synthetic data.",
+    "SmartCura is an AI-powered healthcare platform: ESP32 vitals monitoring, an AI health-summary pipeline, video consultations, e-prescriptions, pharmacy delivery and emergency response — verified end-to-end on live infrastructure, on synthetic data.",
   applicationName: "SmartCura",
   authors: [{ name: "Md Ashraful Islam" }],
   generator: "Next.js",
   keywords: [
-    "final-year project",
-    "FYP",
+    "AI healthcare platform",
+    "digital health",
+    "remote patient monitoring",
     "telemedicine",
     "ESP32",
     "health monitoring",
@@ -75,7 +76,7 @@ export const viewport: Viewport = {
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className={mono.variable}
+      className={`public-root ${mono.variable}`}
       style={{
         // Always present on the public site so it never accidentally inherits a
         // dark dashboard body background from ancestor globals.css.

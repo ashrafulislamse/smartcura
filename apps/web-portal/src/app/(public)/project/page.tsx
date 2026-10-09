@@ -36,7 +36,7 @@ const TIMELINE: ReadonlyArray<Milestone> = [
     date: "17 Aug 2026",
     headline: "BLE provisioning race fix + AI-5 verified live.",
     detail:
-      "subscribe to onValueReceived before writes — the peripheral-bound notification race is closed. health_summary artifact type verified end-to-end with a real ESP32 reading cited by source.",
+      "Subscribing to onValueReceived before the writes closed the peripheral-bound notification race. The health_summary artifact type was verified end-to-end with a real ESP32 reading cited by source.",
   },
   {
     date: "18 Aug 2026",
@@ -87,11 +87,11 @@ export default function ProjectPage() {
           </h1>
           <div className="mt-10 max-w-[60ch] space-y-5 text-[length:var(--text-2)] leading-relaxed text-[var(--color-ink-inverse)]/85">
             <p>
-              Hello. I built SmartCura as a final-year project. The brief was
-              ambitious — a platform where a real sensor reading from a real
-              device could end up in front of a real doctor and produce
-              something structured and safe, without claiming more than it can
-              verify.
+              Hello. I'm building SmartCura, an early-stage health-technology
+              platform. The goal is ambitious — a platform where a real sensor
+              reading from a real device can end up in front of a real doctor
+              and produce something structured and safe, without claiming more
+              than it can verify.
             </p>
             <p>
               What "done" meant, for me, was: the pipeline runs, end-to-end,
@@ -134,26 +134,23 @@ export default function ProjectPage() {
             </h2>
           </header>
 
-          <ol className="mt-12 space-y-6">
+          {/* Vertical rail — the spine carries the pulse metaphor; each
+              milestone is a node on it. The rail replaces the earlier card
+              stack so the reading order is visible at a glance. */}
+          <ol className="ml-2 mt-12 space-y-10 border-l border-[var(--rule-strong)] pl-8">
             {TIMELINE.map((m, idx) => (
-              <li
-                key={m.date}
-                className="relative grid gap-3 rounded-xl border border-[var(--rule-hairline)] bg-white p-5 md:grid-cols-[160px_minmax(0,1fr)] md:items-start"
-              >
-                <div>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-3)]">
-                    Milestone 0{idx + 1}
-                  </p>
-                  <p className="mt-2 font-mono text-[14px] font-semibold tabular-nums text-[var(--color-ink)]">
-                    {m.date}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-[16px] font-semibold leading-snug text-[var(--color-ink)]">
-                    {m.headline}
-                  </h3>
-                  <p className="mt-2 text-[14px] leading-relaxed text-[var(--color-ink-2)]">{m.detail}</p>
-                </div>
+              <li key={m.date} className="relative">
+                <span
+                  aria-hidden
+                  className="absolute -left-[38px] top-1 block h-3 w-3 rounded-full bg-[var(--color-brand-blue)] ring-[3px] ring-[var(--color-paper)]"
+                />
+                <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-brand-blue)]">
+                  {m.date} · milestone 0{idx + 1}
+                </p>
+                <h3 className="mt-2 text-[length:var(--text-4)] font-semibold leading-snug tracking-[-0.005em] text-[var(--color-ink)]">
+                  {m.headline}
+                </h3>
+                <p className="mt-2 max-w-[70ch] text-[14px] leading-relaxed text-[var(--color-ink-2)]">{m.detail}</p>
               </li>
             ))}
           </ol>
@@ -214,7 +211,7 @@ export default function ProjectPage() {
           </header>
           <ul className="mt-8 grid gap-4 md:grid-cols-2">
             <li className="rounded-xl border border-[var(--rule-hairline)] bg-white p-5 text-[14px] leading-relaxed text-[var(--color-ink)]">
-              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-3)]">Out of FYP scope</span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-3)]">On the roadmap</span>
               <p className="mt-2">AI-10 wearable expansion beyond Health Connect. Real Stripe payments (a deterministic stub by design). A real production deployment of FCM / SMTP (the adapters are wired, the credentials are optional).</p>
             </li>
             <li className="rounded-xl border border-[var(--rule-hairline)] bg-white p-5 text-[14px] leading-relaxed text-[var(--color-ink)]">

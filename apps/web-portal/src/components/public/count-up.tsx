@@ -19,7 +19,11 @@ interface Props {
  * motion is requested.
  */
 export function CountUp({ to, duration = 600, suffix, prefix, className }: Props) {
-  const [value, setValue] = useState(0);
+  // Start at the final value so the server-rendered HTML (and the no-JS
+  // fallback) shows the honest number — never a flash of 0. The animation
+  // rewinds to 0 on the client only, after mount, when the value scrolls into
+  // view.
+  const [value, setValue] = useState(to);
   const ref = useRef<HTMLSpanElement | null>(null);
   const started = useRef(false);
 
@@ -31,6 +35,11 @@ export function CountUp({ to, duration = 600, suffix, prefix, className }: Props
       setValue(to);
       return;
     }
+
+    // Client-only: rewind to 0 so the entry animation has somewhere to go.
+    // If the value is already in view when this mounts (short pages), the
+    // observer below fires immediately and the count runs at once.
+    setValue(0);
 
     const io = new IntersectionObserver(
       (entries) => {
